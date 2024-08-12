@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-type Route struct {
+type Controller struct {
 	http.Handler
 	Methods     []string
 	Headers     []string
@@ -12,4 +12,6 @@ type Route struct {
 	RequireAuth bool
 }
 
-var Routes map[string]*map[string]Route
+type Route map[string]Controller
+
+var Routes = make(map[string]*Route)

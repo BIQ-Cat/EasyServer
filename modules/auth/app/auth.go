@@ -8,7 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/BIQ-Cat/easyserver/models"
+	"github.com/BIQ-Cat/easyserver/config"
+	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 	"github.com/BIQ-Cat/easyserver/routes"
 	"github.com/BIQ-Cat/easyserver/utils"
 	"github.com/dgrijalva/jwt-go"
@@ -84,7 +85,9 @@ func JWTAuthentication(next http.Handler) http.Handler {
 			return
 		}
 
-		utils.LogInDebug(fmt.Sprintf("User %v", tk.UserId))
+		if config.Config.Debug {
+			fmt.Printf("User %v\n", tk.UserId)
+		}
 		ctx := context.WithValue(r.Context(), UserKey{}, tk.UserId)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)

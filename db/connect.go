@@ -1,24 +1,25 @@
-package models
+package db
 
 import (
 	"fmt"
-	"log"
 	"os"
 
+	"github.com/BIQ-Cat/easyserver/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 )
 
 var db *gorm.DB
-var modelsList []interface{}
+var ModelsList []interface{}
 
-func init() {
+func Connect() error {
 
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Print(err)
-		err = nil
+		if config.Config.Debug {
+			fmt.Println(fmt.Errorf("WARNING: %w", err))
+		}
 	}
 
 	username := os.Getenv("db_user")
@@ -31,11 +32,12 @@ func init() {
 
 	conn, err := gorm.Open("postgres", dbUri)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(modelsList...)
+	db.Debug().AutoMigrate(ModelsList...)
+	return nil
 }
 
 func GetDB() *gorm.DB {

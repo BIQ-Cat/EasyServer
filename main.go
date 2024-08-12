@@ -1,18 +1,19 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/BIQ-Cat/easyserver/app"
+	"github.com/BIQ-Cat/easyserver/db"
+	"github.com/BIQ-Cat/easyserver/middlewares"
 	"github.com/BIQ-Cat/easyserver/routes"
-	_ "github.com/BIQ-Cat/easyserver/routes/auth"
-	"github.com/BIQ-Cat/easyserver/utils"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+
+	// Module imports
+	_ "github.com/BIQ-Cat/easyserver/modules"
 )
 
 func init() {
@@ -21,14 +22,14 @@ func init() {
 	}
 }
 
-var debug = flag.Bool("debug", false, "Enable debug logs")
-
 func main() {
-	flag.Parse()
-	utils.SetDebug(*debug)
+	err := db.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	root := mux.NewRouter()
-	root.Use(app.JWTAuthentication)
+	root.Use(middlewares.Middlewares...)
 
 	for name, subroutes := range routes.Routes {
 		subrouter := root.PathPrefix("/" + name).Subrouter()
