@@ -17,20 +17,19 @@ func (a *Account) Create() (map[string]interface{}, error) {
 		return msg, nil
 	}
 
-	a.Verifyed = false
+	a.Verified = false
 
-	if moduleConfig.Config.Create.SetPasswordBeforeVerification {
+	if !moduleConfig.Config.Verify.SetPasswordAfter {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(a.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return nil, err
 		}
 		a.Password = string(hashedPassword)
+	}
+	db.GetDB().Create(a)
 
-		db.GetDB().Create(a)
-
-		if a.ID <= 0 {
-			return utils.Message(false, "Failed to create account, connection error."), nil
-		}
+	if a.ID <= 0 {
+		return utils.Message(false, "Failed to create account, connection error."), nil
 	}
 
 	err := a.generateToken()
@@ -45,28 +44,54 @@ func (a *Account) Create() (map[string]interface{}, error) {
 	return response, nil
 }
 
-func Login(username, password string) (map[string]interface{}, error) {
+func Login(login, password string) (map[string]interface{}, error) {
 	account := &Account{}
+	var err error
+	fields := make([]string, 3)
 
-	err := db.GetDB().Table("accounts").Where("username = ?", username).First(account).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return utils.Message(false, "Email address not found"), nil
-		}
-		if config.Config.Debug {
-			return nil, err
-		} else {
-			log.Println(fmt.Errorf("ERROR: Login: Check username: %w", err))
-			return utils.Message(false, "Connection error. Please retry"), nil
-		}
+	if !moduleConfig.Config.Create.DisableUsername {
+		fields = append(fields, "username")
+	}
+	if moduleConfig.Config.Create.Email.UseAsLogin {
+		fields = append(fields, "email")
+	}
+	if moduleConfig.Config.Create.Phone.UseAsLogin {
+		fields = append(fields, "phone")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
-	if err != nil {
-		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return utils.Message(false, "Invalid login credentials. Please try again"), nil
+	for _, field := range fields {
+		if field == "" {
+			continue
 		}
-		return nil, err
+		err = db.GetDB().Table("accounts").Where(field+" = ?", login).First(account).Error
+
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				continue
+			}
+			if config.Config.Debug {
+				return nil, err
+			} else {
+				log.Println(fmt.Errorf("ERROR: Login: Check username: %w", err))
+				return utils.Message(false, "Connection error. Please retry"), nil
+			}
+		}
+		break
+	}
+
+	if err != nil {
+		return utils.Message(false, "Login not found"), nil
+	}
+
+	if !moduleConfig.Config.Verify.SetPasswordAfter || account.Verified {
+
+		err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
+		if err != nil {
+			if err == bcrypt.ErrMismatchedHashAndPassword {
+				return utils.Message(false, "Invalid login credentials. Please try again"), nil
+			}
+			return nil, err
+		}
 	}
 
 	account.Password = ""

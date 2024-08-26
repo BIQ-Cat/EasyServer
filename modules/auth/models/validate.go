@@ -20,15 +20,15 @@ func (a *Account) Validate() (msg map[string]interface{}, ok bool) {
 		msg, ok = a.validateEmail()
 	}
 
-	if a.Phone == "" && config.Config.Create.IsEmailRequired(a.Email) {
+	if a.Phone == "" && config.Config.Create.IsPhoneRequired(a.Email) {
 		return utils.Message(false, "Phone number is required"), false
 	} else if a.Phone != "" {
 		msg, ok = a.validatePhoneNumber()
 	}
 
-	if a.Password == "" && config.Config.Create.SetPasswordBeforeVerification {
+	if a.Password == "" && !config.Config.Verify.SetPasswordAfter {
 		return utils.Message(false, "Password is required"), false
-	} else if a.Password != "" && config.Config.Create.SetPasswordBeforeVerification {
+	} else if a.Password != "" && !config.Config.Verify.SetPasswordAfter {
 		msg, ok = a.validatePassword()
 	}
 
@@ -36,12 +36,8 @@ func (a *Account) Validate() (msg map[string]interface{}, ok bool) {
 		return
 	}
 
-	if config.Config.Create.HasUsername {
+	if !config.Config.Create.DisableUsername {
 		msg, ok = a.validateUsername()
-	} else if a.Email != "" && config.Config.Create.RequireData != config.CREATE_PHONE_ONLY_REQUIRED {
-		a.Username = a.Email
-	} else if a.Phone != "" {
-		a.Username = a.Email
 	}
 	return
 }

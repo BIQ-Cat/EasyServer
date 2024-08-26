@@ -1,27 +1,32 @@
 package models
 
 import (
-	"os"
+	"time"
 
+	"github.com/BIQ-Cat/easyserver/config"
 	"github.com/BIQ-Cat/easyserver/db"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jinzhu/gorm"
 )
 
 type Token struct {
 	UserId   uint
 	Verified bool
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 type Account struct {
 	gorm.Model
-	Email    string `json:"email,omitempty"`
-	Password string `json:"password"`
-	Token    string `json:"token" gorm:"-:all"`
-	Phone    string `json:"phone,omitempty"`
-	Username string `json:"username"`
-	Verifyed bool   `json:"verifyed"`
+	Email                    string    `json:"email,omitempty"`
+	Password                 string    `json:"password"`
+	Token                    string    `json:"token" gorm:"-:all"`
+	Phone                    string    `json:"phone,omitempty"`
+	Username                 string    `json:"username"`
+	Verified                 bool      `json:"verified"`
+	VerificationOTP          string    `json:"-"`
+	RestorePasswordOTP       string    `json:"-"`
+	TimeVerificationOTPSet   time.Time `json:"-"`
+	TimeForgotPasswordOTPSet time.Time `json:"-"`
 }
 
 func GetUser(u uint) *Account {
@@ -37,9 +42,9 @@ func GetUser(u uint) *Account {
 }
 
 func (a *Account) generateToken() error {
-	tk := &Token{UserId: a.ID, Verified: a.Verifyed}
-	token := jwt.NewWithClaims(jwt.GetSigningMethod("H256"), tk)
-	tokenString, err := token.SignedString([]byte(os.Getenv("token_password")))
+	tk := &Token{UserId: a.ID, Verified: a.Verified}
+	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
+	tokenString, err := token.SignedString([]byte(config.EnvConfig.TokenPassword))
 	if err != nil {
 		return err
 	}

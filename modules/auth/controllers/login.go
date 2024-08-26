@@ -2,10 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
-	"github.com/BIQ-Cat/easyserver/config"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 	"github.com/BIQ-Cat/easyserver/routes"
 	"github.com/BIQ-Cat/easyserver/utils"
@@ -24,10 +22,8 @@ func init() {
 
 		resp, err := models.Login(account.Username, account.Password)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			if config.Config.Debug {
-				fmt.Fprint(w, err)
-			}
+			utils.HandleError(w, err)
+			return
 		}
 		utils.Respond(w, resp)
 	}

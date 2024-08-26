@@ -2,33 +2,23 @@ package db
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/BIQ-Cat/easyserver/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
 )
 
 var db *gorm.DB
 var ModelsList []interface{}
 
 func Connect() error {
+	username := config.EnvConfig.DBUser
+	password := config.EnvConfig.DBPass
+	dbName := config.EnvConfig.DBName
+	dbHost := config.EnvConfig.DBHost
+	dbPort := config.EnvConfig.DBPort
 
-	err := godotenv.Load()
-	if err != nil {
-		if config.Config.Debug {
-			fmt.Println(fmt.Errorf("WARNING: %w", err))
-		}
-	}
-
-	username := os.Getenv("db_user")
-	password := os.Getenv("db_pass")
-	dbName := os.Getenv("db_name")
-	dbHost := os.Getenv("db_host")
-
-	dbUri := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, username, dbName, password) //Создать строку подключения
-	fmt.Println(dbUri)
+	dbUri := fmt.Sprintf("host=%s user=%s dbname=%s port=%d sslmode=disable password=%s", dbHost, username, dbName, dbPort, password) //Создать строку подключения
 
 	conn, err := gorm.Open("postgres", dbUri)
 	if err != nil {

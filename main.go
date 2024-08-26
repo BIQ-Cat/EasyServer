@@ -4,26 +4,28 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"strconv"
 
+	"github.com/BIQ-Cat/easyserver/config"
+	"github.com/BIQ-Cat/easyserver/config/auto"
 	"github.com/BIQ-Cat/easyserver/db"
 	"github.com/BIQ-Cat/easyserver/middlewares"
 	"github.com/BIQ-Cat/easyserver/routes"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 
 	// Module imports
 	_ "github.com/BIQ-Cat/easyserver/modules"
 )
 
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
-	}
-}
-
 func main() {
-	err := db.Connect()
+	err := config.LoadEnv()
+	if err == auto.ErrEnvNotSet {
+		log.Fatal("Not all environment variables are set")
+	} else if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,8 +34,14 @@ func main() {
 	root.Use(middlewares.Middlewares...)
 
 	for name, subroutes := range routes.Routes {
+		if config.Config.Debug {
+			fmt.Println(name, "contains")
+		}
 		subrouter := root.PathPrefix("/" + name).Subrouter()
 		for subpath, handler := range *subroutes {
+			if config.Config.Debug {
+				fmt.Println("\t", subpath)
+			}
 			route := subrouter.Handle("/"+subpath, handler)
 			if len(handler.Methods) != 0 {
 				route.Methods(handler.Methods...)
@@ -47,11 +55,6 @@ func main() {
 		}
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	fmt.Println("Server is running on port", port)
-	log.Fatal(http.ListenAndServe(":"+port, root))
+	fmt.Println("Server is running on port", config.EnvConfig.ServerPort)
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.EnvConfig.ServerPort), root))
 }
