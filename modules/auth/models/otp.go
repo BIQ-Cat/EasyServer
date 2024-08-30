@@ -10,7 +10,7 @@ import (
 	"github.com/BIQ-Cat/easyserver/config"
 	moduleConfig "github.com/BIQ-Cat/easyserver/modules/auth/config"
 	"github.com/BIQ-Cat/easyserver/utils"
-	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/pbkdf2"
 )
 
@@ -20,6 +20,14 @@ func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (
 		FirstName string
 		Subject   string
 		Token     string
+	}
+
+	if a.Verified {
+		return utils.Message(false, "Account is already verified"), nil
+	}
+
+	if !moduleConfig.Config.Create.Email.Require {
+		return utils.Message(false, "Email verification is disabled on this server"), nil
 	}
 
 	if a.Email != email {
@@ -44,7 +52,7 @@ func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (
 	}
 
 	data := emailData{
-		URL:       host + "/auth/" + controller + "?token=" + base64.StdEncoding.EncodeToString([]byte(otp)) + "&style=visual",
+		URL:       host + "/auth/" + controller + "?token=" + base64.StdEncoding.EncodeToString([]byte(otp)) + "&visual=1",
 		FirstName: a.Username,
 		Subject:   subject,
 		Token:     otp,
@@ -58,10 +66,12 @@ func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (
 	return utils.Message(true, "OTP is sent on Email"), nil
 }
 
-func VerifyAccount(otp string) (map[string]interface{}, error) {
-	acc, ok, err := findUserByField("verification_otp", string(
-		pbkdf2.Key([]byte(otp), []byte(config.EnvConfig.OTPPassword), moduleConfig.PBKDF2Iter, moduleConfig.PBKDF2Length, sha256.New),
-	))
+func VerifyAccount(otp []byte) (map[string]interface{}, error) {
+	acc, ok, err := findUserByField("verification_otp",
+		base64.StdEncoding.EncodeToString(
+			pbkdf2.Key(otp, []byte(config.EnvConfig.OTPPassword), moduleConfig.PBKDF2Iter, moduleConfig.PBKDF2Length, sha256.New),
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -79,12 +89,76 @@ func VerifyAccount(otp string) (map[string]interface{}, error) {
 	}
 
 	acc.Verified = true
+	acc.VerificationOTP = ""
 	err = db.GetDB().Save(acc).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.Message(true, "Account has been verified"), nil
+	acc.Password = ""
+
+	err = acc.generateToken()
+	if err != nil {
+		return nil, err
+	}
+
+	resp := utils.Message(true, "Account has been verified")
+	resp["account"] = acc
+	return resp, nil
+}
+
+func ResetPassword(otp, password []byte) (map[string]interface{}, error) {
+	acc, ok, err := findUserByField("restore_password_otp",
+		base64.StdEncoding.EncodeToString(
+			pbkdf2.Key(otp, []byte(config.EnvConfig.OTPPassword), moduleConfig.PBKDF2Iter, moduleConfig.PBKDF2Length, sha256.New),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return utils.Message(false, "No user with such token"), nil
+	}
+
+	if acc.Verified {
+		return utils.Message(false, "Account is already verified"), nil
+	}
+
+	if time.Since(acc.TimeVerificationOTPSet) > moduleConfig.Config.Verify.TokenLifetime {
+		return utils.Message(false, "Token has expired"), nil
+	}
+
+	acc.RestorePasswordOTP = ""
+	resp, err := acc.ChangePassword(password) // Saves account internally
+	if err != nil || !utils.GetStatus(resp) {
+		return resp, err
+	}
+
+	acc.Password = ""
+
+	err = acc.generateToken()
+	if err != nil {
+		return nil, err
+	}
+
+	resp["account"] = acc
+	return resp, nil
+}
+
+func (a *Account) ChangePassword(password []byte) (map[string]interface{}, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	a.Password = string(hashedPassword)
+	err = db.GetDB().Save(a).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.Message(true, "Changed password"), nil
 }
 
 func (a *Account) setOTP(isVerification bool) (string, map[string]interface{}, error) {
@@ -114,17 +188,20 @@ func (a *Account) setOTP(isVerification bool) (string, map[string]interface{}, e
 	otpToken := utils.RandomText(moduleConfig.Config.OTPLength)
 	salt := []byte(config.EnvConfig.OTPPassword)
 	for {
-		newOTP := string(pbkdf2.Key(otpToken, salt, 4096, 32, sha256.New))
+		newOTP := base64.StdEncoding.EncodeToString(pbkdf2.Key(otpToken, salt, 4096, 32, sha256.New))
+
 		_, ok, err := findUserByField(fieldName, newOTP)
 		if err != nil {
 			return "", nil, err
 		}
+
 		if ok {
 			otpToken = utils.RandomText(moduleConfig.Config.OTPLength)
 			continue
 		}
 
 		*otp = newOTP
+		*otpSet = time.Now()
 		break
 	}
 
@@ -134,15 +211,4 @@ func (a *Account) setOTP(isVerification bool) (string, map[string]interface{}, e
 	}
 
 	return string(otpToken), nil, nil
-}
-
-func findUserByField(field, value string) (acc Account, ok bool, err error) {
-	err = db.GetDB().Table("accounts").Where(field+" = ?", value).First(&acc).Error
-	if err == gorm.ErrRecordNotFound {
-		err = nil
-	} else if err == nil {
-		ok = true
-	}
-
-	return
 }

@@ -52,3 +52,14 @@ func (a *Account) generateToken() error {
 
 	return nil
 }
+
+func findUserByField(field, value string) (acc Account, ok bool, err error) {
+	err = db.GetDB().Table("accounts").Where(field+" = ?", value).First(&acc).Error
+	if err == gorm.ErrRecordNotFound {
+		err = nil
+	} else if err == nil {
+		ok = true
+	}
+
+	return
+}

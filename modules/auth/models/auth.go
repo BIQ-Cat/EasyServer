@@ -17,7 +17,7 @@ func (a *Account) Create() (map[string]interface{}, error) {
 		return msg, nil
 	}
 
-	a.Verified = false
+	a.Verified = !moduleConfig.Config.Create.Email.Require && !moduleConfig.Config.Create.Phone.Require
 
 	if !moduleConfig.Config.Verify.SetPasswordAfter {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(a.Password), bcrypt.DefaultCost)

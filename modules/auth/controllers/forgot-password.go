@@ -28,7 +28,7 @@ func init() {
 		var resp map[string]interface{}
 
 		if r.URL.Query().Has("email") && config.Config.Create.Email.Require {
-			resp, err = acc.SendEmailOTP(r.URL.Query().Get("email"), true, r.Host)
+			resp, err = acc.SendEmailOTP(r.URL.Query().Get("email"), false, r.Host)
 		} else {
 			utils.Respond(w, utils.Message(false, "Invalid request"))
 			return
@@ -41,7 +41,7 @@ func init() {
 		utils.Respond(w, resp)
 	}
 
-	Route["verify-send"] = routes.Controller{
+	Route["forgot-password"] = routes.Controller{
 		Handler:     http.HandlerFunc(sendOTP),
 		Methods:     []string{"GET"},
 		RequireAuth: true,
