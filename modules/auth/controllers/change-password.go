@@ -1,0 +1,56 @@
+package controllers
+
+import (
+	"net/http"
+
+	"github.com/BIQ-Cat/easyserver/db"
+	"github.com/BIQ-Cat/easyserver/modules/auth/app"
+	"github.com/BIQ-Cat/easyserver/modules/auth/config"
+	"github.com/BIQ-Cat/easyserver/modules/auth/models"
+	"github.com/BIQ-Cat/easyserver/routes"
+	"github.com/BIQ-Cat/easyserver/utils"
+	"github.com/jinzhu/gorm"
+)
+
+func init() {
+	changePassword := func(w http.ResponseWriter, r *http.Request) {
+		id := r.Context().Value(app.UserKey{}).(uint)
+		var acc models.Account
+
+		err := db.GetDB().Table("accounts").Where("id = ?", id).First(&acc).Error
+		if err == gorm.ErrRecordNotFound {
+			panic(err) // must exist
+		} else if err != nil {
+			utils.HandleError(w, err)
+			return
+		}
+
+		if !config.Config.Verify.SetPasswordAfter || acc.Password != "" {
+			utils.Respond(w, utils.Message(false, "Forbidden"))
+			return
+		}
+
+		err = r.ParseForm()
+		if err != nil {
+			utils.HandleError(w, err)
+			return
+		}
+
+		if r.Form.Has("password") {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+
+		resp, err := acc.ChangePassword([]byte(r.Form.Get("password")))
+		if err != nil {
+			utils.HandleError(w, err)
+		}
+		utils.Respond(w, resp)
+	}
+
+	Route["change-password"] = routes.Controller{
+		Handler:     http.HandlerFunc(changePassword),
+		Methods:     []string{http.MethodPost},
+		RequireAuth: true,
+	}
+}
