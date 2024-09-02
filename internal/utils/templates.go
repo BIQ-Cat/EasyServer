@@ -1,14 +1,16 @@
 package utils
 
 import (
+	"html/template"
 	"os"
 	"path/filepath"
-	"text/template"
 )
 
 func ParseTemplateDir(dir string) (*template.Template, error) {
 	var paths []string
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+
+	templateDir := filepath.Join("templates", dir)
+	err := filepath.Walk(templateDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}

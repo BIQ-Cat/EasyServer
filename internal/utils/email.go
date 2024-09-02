@@ -37,7 +37,7 @@ func SendEmail(to string, subject string, data interface{}, emailTemp string) er
 
 	var body bytes.Buffer
 
-	templ, err := ParseTemplateDir("templates")
+	templ, err := ParseTemplateDir("mail")
 	if err != nil {
 		return err
 	}
