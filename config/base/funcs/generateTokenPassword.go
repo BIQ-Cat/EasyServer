@@ -1,4 +1,4 @@
-package auto
+package funcs
 
 import "math/rand"
 

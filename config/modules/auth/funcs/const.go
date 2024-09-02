@@ -1,4 +1,4 @@
-package config
+package funcs
 
 const (
 	PBKDF2Iter   = 4096

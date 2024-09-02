@@ -5,13 +5,18 @@ import (
 	"encoding/base64"
 	"time"
 
-	"github.com/BIQ-Cat/easyserver/db"
-
-	"github.com/BIQ-Cat/easyserver/config"
-	moduleConfig "github.com/BIQ-Cat/easyserver/modules/auth/config"
-	"github.com/BIQ-Cat/easyserver/utils"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/pbkdf2"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/utils"
+
+	// Configuration
+	config "github.com/BIQ-Cat/easyserver/config/base"
+
+	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
+	moduleConfigFuncs "github.com/BIQ-Cat/easyserver/config/modules/auth/funcs"
 )
 
 func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (map[string]interface{}, error) {
@@ -69,7 +74,7 @@ func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (
 func VerifyAccount(otp []byte) (map[string]interface{}, error) {
 	acc, ok, err := findUserByField("verification_otp",
 		base64.StdEncoding.EncodeToString(
-			pbkdf2.Key(otp, []byte(config.EnvConfig.OTPPassword), moduleConfig.PBKDF2Iter, moduleConfig.PBKDF2Length, sha256.New),
+			pbkdf2.Key(otp, []byte(config.EnvConfig.OTPPassword), moduleConfigFuncs.PBKDF2Iter, moduleConfigFuncs.PBKDF2Length, sha256.New),
 		),
 	)
 	if err != nil {
@@ -110,7 +115,7 @@ func VerifyAccount(otp []byte) (map[string]interface{}, error) {
 func ResetPassword(otp, password []byte) (map[string]interface{}, error) {
 	acc, ok, err := findUserByField("restore_password_otp",
 		base64.StdEncoding.EncodeToString(
-			pbkdf2.Key(otp, []byte(config.EnvConfig.OTPPassword), moduleConfig.PBKDF2Iter, moduleConfig.PBKDF2Length, sha256.New),
+			pbkdf2.Key(otp, []byte(config.EnvConfig.OTPPassword), moduleConfigFuncs.PBKDF2Iter, moduleConfigFuncs.PBKDF2Length, sha256.New),
 		),
 	)
 	if err != nil {

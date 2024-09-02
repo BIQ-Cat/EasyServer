@@ -3,10 +3,14 @@ package models
 import (
 	"time"
 
-	"github.com/BIQ-Cat/easyserver/config"
-	"github.com/BIQ-Cat/easyserver/db"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jinzhu/gorm"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/db"
+
+	// Configuration
+	config "github.com/BIQ-Cat/easyserver/config/base"
 )
 
 type Token struct {

@@ -6,26 +6,23 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/BIQ-Cat/easyserver/config"
-	"github.com/BIQ-Cat/easyserver/config/auto"
-	"github.com/BIQ-Cat/easyserver/db"
-	"github.com/BIQ-Cat/easyserver/middlewares"
-	"github.com/BIQ-Cat/easyserver/routes"
+	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/middlewares"
+	"github.com/BIQ-Cat/easyserver/internal/routes"
 	"github.com/gorilla/mux"
 
 	// Module imports
-	_ "github.com/BIQ-Cat/easyserver/modules"
+	_ "github.com/BIQ-Cat/easyserver/config/modules"
+
+	// Configuration
+	config "github.com/BIQ-Cat/easyserver/config/base"
+	configFuncs "github.com/BIQ-Cat/easyserver/config/base/funcs"
 )
 
 func main() {
-	err := config.LoadEnv()
-	if err == auto.ErrEnvNotSet {
-		log.Fatal("Not all environment variables are set")
-	} else if err != nil {
-		log.Fatal(err)
-	}
+	loadEnv()
 
-	err = db.Connect()
+	err := db.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,4 +54,15 @@ func main() {
 
 	fmt.Println("Server is running on port", config.EnvConfig.ServerPort)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.EnvConfig.ServerPort), root))
+}
+
+func loadEnv() {
+	var err error
+
+	config.EnvConfig, err = configFuncs.ParseEnv(config.Config.Debug, &config.EnvConfig)
+	if err == configFuncs.ErrEnvNotSet {
+		log.Fatal("Not all environment variables are set")
+	} else if err != nil {
+		log.Fatal(err)
+	}
 }

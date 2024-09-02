@@ -7,12 +7,18 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/BIQ-Cat/easyserver/config"
-	moduleConfig "github.com/BIQ-Cat/easyserver/modules/auth/config"
-	"github.com/BIQ-Cat/easyserver/modules/auth/models"
-	"github.com/BIQ-Cat/easyserver/routes"
-	"github.com/BIQ-Cat/easyserver/utils"
 	"github.com/golang-jwt/jwt/v5"
+
+	// Modules
+	"github.com/BIQ-Cat/easyserver/modules/auth/models"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver/internal/utils"
+
+	// Configuration
+	config "github.com/BIQ-Cat/easyserver/config/base"
+	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 type UserKey struct{}

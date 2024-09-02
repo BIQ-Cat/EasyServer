@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	// Modules
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
-	"github.com/BIQ-Cat/easyserver/routes"
-	"github.com/BIQ-Cat/easyserver/utils"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver/internal/utils"
 )
 
 func init() {

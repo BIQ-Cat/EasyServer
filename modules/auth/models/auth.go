@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/BIQ-Cat/easyserver/config"
-	"github.com/BIQ-Cat/easyserver/db"
-	moduleConfig "github.com/BIQ-Cat/easyserver/modules/auth/config"
-	"github.com/BIQ-Cat/easyserver/utils"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/utils"
+
+	// Configuration
+	config "github.com/BIQ-Cat/easyserver/config/base"
+	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func (a *Account) Create() (map[string]interface{}, error) {

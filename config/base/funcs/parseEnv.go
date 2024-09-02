@@ -1,4 +1,4 @@
-package auto
+package funcs
 
 import (
 	"errors"
@@ -8,12 +8,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/BIQ-Cat/easyserver/config/base/types"
 	"github.com/joho/godotenv"
 )
 
 var ErrEnvNotSet = errors.New("not all environment variables are set")
 
-func ParseEnv(debug bool, defaults *EnvConfig) (EnvConfig, error) {
+func ParseEnv(debug bool, defaults *types.EnvConfig) (types.EnvConfig, error) {
 	err := godotenv.Load()
 	if err != nil && debug {
 		fmt.Println(fmt.Errorf("WARNING: %w", err))
@@ -24,7 +25,7 @@ func ParseEnv(debug bool, defaults *EnvConfig) (EnvConfig, error) {
 	return *defaults, err
 }
 
-func UnmarshalEnv(cfg *EnvConfig) error {
+func UnmarshalEnv(cfg *types.EnvConfig) error {
 	fields := make(map[string]reflect.Value)
 	defaults := make(map[string]reflect.Value)
 	cfgValue := reflect.ValueOf(cfg).Elem()

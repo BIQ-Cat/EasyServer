@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 
-	"github.com/BIQ-Cat/easyserver/config"
+	config "github.com/BIQ-Cat/easyserver/config/base"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )

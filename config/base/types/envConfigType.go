@@ -1,4 +1,4 @@
-package auto
+package types
 
 type EnvConfig struct {
 	DBName string `name:"DB_NAME"`

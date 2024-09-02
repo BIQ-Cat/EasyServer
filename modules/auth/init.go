@@ -1,12 +1,15 @@
 package auth
 
 import (
-	"github.com/BIQ-Cat/easyserver/db"
-	"github.com/BIQ-Cat/easyserver/middlewares"
+	// Modules
 	"github.com/BIQ-Cat/easyserver/modules/auth/app"
 	"github.com/BIQ-Cat/easyserver/modules/auth/controllers"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
-	"github.com/BIQ-Cat/easyserver/routes"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/middlewares"
+	"github.com/BIQ-Cat/easyserver/internal/routes"
 )
 
 func init() {

@@ -7,7 +7,8 @@ import (
 	"net/smtp"
 	"strconv"
 
-	"github.com/BIQ-Cat/easyserver/config"
+	// Configuration
+	config "github.com/BIQ-Cat/easyserver/config/base"
 )
 
 type headers struct {

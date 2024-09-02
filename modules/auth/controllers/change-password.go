@@ -3,13 +3,19 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/BIQ-Cat/easyserver/db"
-	"github.com/BIQ-Cat/easyserver/modules/auth/app"
-	"github.com/BIQ-Cat/easyserver/modules/auth/config"
-	"github.com/BIQ-Cat/easyserver/modules/auth/models"
-	"github.com/BIQ-Cat/easyserver/routes"
-	"github.com/BIQ-Cat/easyserver/utils"
 	"github.com/jinzhu/gorm"
+
+	// Modules
+	"github.com/BIQ-Cat/easyserver/modules/auth/app"
+	"github.com/BIQ-Cat/easyserver/modules/auth/models"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver/internal/utils"
+
+	// Configuration
+	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func init() {
@@ -25,7 +31,7 @@ func init() {
 			return
 		}
 
-		if !config.Config.Verify.SetPasswordAfter || acc.Password != "" {
+		if !moduleConfig.Config.Verify.SetPasswordAfter || acc.Password != "" {
 			utils.Respond(w, utils.Message(false, "Forbidden"))
 			return
 		}

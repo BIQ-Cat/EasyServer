@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/BIQ-Cat/easyserver/config"
+	// Configuration
+	config "github.com/BIQ-Cat/easyserver/config/base"
 )
 
 func Message(status bool, message string) map[string]interface{} {

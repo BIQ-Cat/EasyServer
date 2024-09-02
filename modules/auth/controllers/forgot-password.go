@@ -3,13 +3,19 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/BIQ-Cat/easyserver/db"
-	"github.com/BIQ-Cat/easyserver/modules/auth/app"
-	"github.com/BIQ-Cat/easyserver/modules/auth/config"
-	"github.com/BIQ-Cat/easyserver/modules/auth/models"
-	"github.com/BIQ-Cat/easyserver/routes"
-	"github.com/BIQ-Cat/easyserver/utils"
 	"github.com/jinzhu/gorm"
+
+	// Modules
+	"github.com/BIQ-Cat/easyserver/modules/auth/app"
+	"github.com/BIQ-Cat/easyserver/modules/auth/models"
+
+	// Internals
+	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver/internal/utils"
+
+	// Configuration
+	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func init() {
@@ -27,7 +33,7 @@ func init() {
 
 		var resp map[string]interface{}
 
-		if r.URL.Query().Has("email") && config.Config.Create.Email.Require {
+		if r.URL.Query().Has("email") && moduleConfig.Config.Create.Email.Require {
 			resp, err = acc.SendEmailOTP(r.URL.Query().Get("email"), false, r.Host)
 		} else {
 			utils.Respond(w, utils.Message(false, "Invalid request"))

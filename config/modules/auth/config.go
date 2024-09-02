@@ -1,25 +1,29 @@
-package config
+package moduleConfig
 
-import "time"
+import (
+	"time"
 
-var Config = config{
-	Create: createConfig{
-		Phone: emailPhoneConfig{
+	"github.com/BIQ-Cat/easyserver/config/modules/auth/types"
+)
+
+var Config = types.Config{
+	Create: types.CreateConfig{
+		Phone: types.EmailPhoneConfig{
 			Require: false,
 		},
-		Email: emailPhoneConfig{
+		Email: types.EmailPhoneConfig{
 			Require:    true,
 			UseAsLogin: true,
 		},
 		RequireEither: true,
 	},
-	Verify: verificationConfig{
+	Verify: types.VerificationConfig{
 		Require:       true,
 		EmailSubject:  "Your account verification code",
 		ResendTimer:   2 * time.Minute,
 		TokenLifetime: 2 * time.Hour,
 	},
-	RestorePassword: restorePasswordConfig{
+	RestorePassword: types.RestorePasswordConfig{
 		EmailSubject: "Your password reset token",
 		ResendTimer:  1 * time.Minute,
 	},
