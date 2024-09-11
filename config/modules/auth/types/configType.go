@@ -38,8 +38,9 @@ type EmailPhoneConfig struct {
 }
 
 type RestorePasswordConfig struct {
-	EmailSubject string        `json:"emailSubject"` // Subject for email sending
-	ResendTimer  time.Duration `json:"resendTimer"`  // How many time should pass before re-sending?
+	EmailSubject  string        `json:"emailSubject"`  // Subject for email sending
+	ResendTimer   time.Duration `json:"resendTimer"`   // How many time should pass before re-sending?
+	TokenLifetime time.Duration `json:"tokenLifetime"` // How long token will be available?
 }
 
 func (cfg EmailPhoneConfig) isRequired(requireBoth bool, other string, otherCfg EmailPhoneConfig) bool {

@@ -20,7 +20,7 @@ func init() {
 			return
 		}
 
-		templ, err := utils.ParseTemplateDir("templates")
+		templ, err := utils.ParseTemplateDir("auth")
 		if err != nil {
 			utils.HandleError(w, err)
 			return

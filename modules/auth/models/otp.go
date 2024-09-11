@@ -27,7 +27,7 @@ func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (
 		Token     string
 	}
 
-	if a.Verified {
+	if a.Verified && isVerification {
 		return utils.Message(false, "Account is already verified"), nil
 	}
 
@@ -126,11 +126,7 @@ func ResetPassword(otp, password []byte) (map[string]interface{}, error) {
 		return utils.Message(false, "No user with such token"), nil
 	}
 
-	if acc.Verified {
-		return utils.Message(false, "Account is already verified"), nil
-	}
-
-	if time.Since(acc.TimeVerificationOTPSet) > moduleConfig.Config.Verify.TokenLifetime {
+	if time.Since(acc.TimeForgotPasswordOTPSet) > moduleConfig.Config.RestorePassword.TokenLifetime {
 		return utils.Message(false, "Token has expired"), nil
 	}
 
@@ -158,6 +154,10 @@ func (a *Account) ChangePassword(password []byte) (map[string]interface{}, error
 	}
 
 	a.Password = string(hashedPassword)
+	msg, ok := a.validatePassword()
+	if !ok {
+		return msg, nil
+	}
 	err = db.GetDB().Save(a).Error
 	if err != nil {
 		return nil, err

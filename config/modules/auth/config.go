@@ -24,8 +24,9 @@ var Config = types.Config{
 		TokenLifetime: 2 * time.Hour,
 	},
 	RestorePassword: types.RestorePasswordConfig{
-		EmailSubject: "Your password reset token",
-		ResendTimer:  1 * time.Minute,
+		EmailSubject:  "Your password reset token",
+		ResendTimer:   1 * time.Minute,
+		TokenLifetime: 2 * time.Hour,
 	},
 	RewriteWithJSON: true,
 	OTPLength:       6,
