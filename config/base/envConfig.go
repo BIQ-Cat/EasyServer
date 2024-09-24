@@ -8,4 +8,7 @@ import (
 var EnvConfig = types.EnvConfig{
 	TokenPassword: funcs.GenerateTokenPassword(30),
 	OTPPassword:   funcs.GenerateTokenPassword(30),
+
+	OAuthGoogleClientID:     funcs.EnvNoData,
+	OAuthGoogleClientSecret: funcs.EnvNoData,
 }

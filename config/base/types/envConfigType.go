@@ -18,4 +18,7 @@ type EnvConfig struct {
 	SMTPPass  string `name:"SMTP_PASS"`
 	SMTPPort  int    `name:"SMTP_PORT"`
 	SMTPUser  string `name:"SMTP_USER"`
+
+	OAuthGoogleClientID     string `name:"OAUTH_GOOGLE_CLIENT_ID"`
+	OAuthGoogleClientSecret string `name:"OAUTH_GOOGLE_CLIENT_SECRET"`
 }

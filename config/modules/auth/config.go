@@ -3,6 +3,7 @@ package moduleConfig
 import (
 	"time"
 
+	"github.com/BIQ-Cat/easyserver/config/modules/auth/funcs"
 	"github.com/BIQ-Cat/easyserver/config/modules/auth/types"
 )
 
@@ -27,6 +28,10 @@ var Config = types.Config{
 		EmailSubject:  "Your password reset token",
 		ResendTimer:   1 * time.Minute,
 		TokenLifetime: 2 * time.Hour,
+	},
+
+	OAuthConfigsEnabled: map[string]types.OAuthConfig{
+		"google": funcs.OAuthGoogleConfig(),
 	},
 	RewriteWithJSON: true,
 	OTPLength:       6,

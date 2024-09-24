@@ -1,13 +1,16 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 type Config struct {
-	Create          CreateConfig          `json:"create"`          // Configure data required to create account
-	OTPLength       int                   `json:"otpLength"`       // How long one-time password should be
-	Verify          VerificationConfig    `json:"verify"`          // Configure verification
-	RestorePassword RestorePasswordConfig `json:"restorePassword"` // Restore password configuration
-	RewriteWithJSON bool                  `json:"-"`               // Enables JSON configuration. If it exists (path ./json/modules/auth.json), this configuration will be shadowed by JSON one
+	Create              CreateConfig           `json:"create"`          // Configure data required to create account
+	OTPLength           int                    `json:"otpLength"`       // How long one-time password should be
+	Verify              VerificationConfig     `json:"verify"`          // Configure verification
+	RestorePassword     RestorePasswordConfig  `json:"restorePassword"` // Restore password configuration
+	RewriteWithJSON     bool                   `json:"-"`               // Enables JSON configuration. If it exists (path ./json/modules/auth.json), this configuration will be shadowed by JSON one
+	OAuthConfigsEnabled map[string]OAuthConfig // All OAuth2 configurations enabled for the server. Here, the key should be a handler name passing in request.
 }
 
 type CreateConfig struct {
