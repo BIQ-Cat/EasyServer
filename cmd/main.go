@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/json"
 	"github.com/BIQ-Cat/easyserver/internal/middlewares"
 	"github.com/BIQ-Cat/easyserver/internal/routes"
 	"github.com/gorilla/mux"
@@ -27,30 +28,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = json.ParseFiles()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	root := mux.NewRouter()
 	root.Use(middlewares.Middlewares...)
 
-	for name, subroutes := range routes.Routes {
-		if config.Config.Debug {
-			fmt.Println(name, "contains")
-		}
-		subrouter := root.PathPrefix("/" + name).Subrouter()
-		for subpath, handler := range *subroutes {
-			if config.Config.Debug {
-				fmt.Println("\t", subpath)
-			}
-			route := subrouter.Handle("/"+subpath, handler)
-			if len(handler.Methods) != 0 {
-				route.Methods(handler.Methods...)
-			}
-			if len(handler.Schemas) != 0 {
-				route.Schemes(handler.Schemas...)
-			}
-			if len(handler.Headers) != 0 {
-				route.Methods(handler.Headers...)
-			}
-		}
-	}
+	routes.Setup(root)
 
 	fmt.Println("Server is running on port", config.EnvConfig.ServerPort)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.EnvConfig.ServerPort), root))

@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -25,11 +24,12 @@ type UserKey struct{}
 
 func JWTAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controller := getController(r.URL.Path)
+		controller := routes.GetController(r.URL.Path)
 		if controller == nil || !controller.RequireAuth {
 			next.ServeHTTP(w, r)
 			return
 		}
+
 		var response map[string]interface{}
 		tokenHeader := r.Header.Get("Authorization")
 		if tokenHeader == "" {
@@ -39,14 +39,15 @@ func JWTAuthentication(next http.Handler) http.Handler {
 			return
 		}
 
-		splitted := strings.Split(tokenHeader, " ")
-		if len(splitted) != 2 {
+		bearerToken := strings.Split(tokenHeader, " ") // []string{"Bearer", "<token>"} (?)
+		if len(bearerToken) != 2 && bearerToken[0] != "Bearer" {
 			response = utils.Message(false, "Invalid/Malformed auth token")
 			w.WriteHeader(http.StatusForbidden)
 			utils.Respond(w, response)
 			return
 		}
-		tokenPart := splitted[1]
+
+		tokenPart := bearerToken[1]
 		tk := &models.Token{}
 		token, err := jwt.ParseWithClaims(tokenPart, tk, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.EnvConfig.TokenPassword), nil
@@ -83,22 +84,6 @@ func JWTAuthentication(next http.Handler) http.Handler {
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
-}
-
-func getController(requestPath string) *routes.Controller {
-	for path, subroutes := range routes.Routes {
-		for subpath, route := range *subroutes {
-			fullPath := fmt.Sprintf("/%s/%s", path, subpath)
-			if fullPath == requestPath {
-				return &route
-			}
-		}
-	}
-
-	if config.Config.Debug {
-		log.Println("WARNING: no controller found")
-	}
-	return nil // 404
 }
 
 func verificationRequired(tk models.Token, path string, c *routes.Controller) bool {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/BIQ-Cat/easyserver/config/modules/auth/funcs"
 	"github.com/BIQ-Cat/easyserver/config/modules/auth/types"
+	basicTypes "github.com/BIQ-Cat/easyserver/config/types"
 )
 
 var Config = types.Config{
@@ -33,6 +34,9 @@ var Config = types.Config{
 	OAuthConfigsEnabled: map[string]types.OAuthConfig{
 		"google": funcs.OAuthGoogleConfig(),
 	},
-	RewriteWithJSON: true,
-	OTPLength:       6,
+	OTPLength: 6,
+
+	BasicConfig: basicTypes.BasicConfig{
+		RewriteWithJSON: true,
+	},
 }
