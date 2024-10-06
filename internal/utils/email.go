@@ -71,7 +71,10 @@ func buildMessage(hdrs headers, body []byte) []byte {
 
 	var encodedBody bytes.Buffer
 	w := quotedprintable.NewWriter(&encodedBody)
-	w.Write(body)
+	_, err := w.Write(body)
+	if err != nil {
+		panic(err) // Bad argument
+	}
 	w.Close()
 
 	msg := headerMsg.Bytes()
