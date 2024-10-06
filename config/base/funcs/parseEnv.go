@@ -15,13 +15,11 @@ import (
 var ErrEnvNotSet = errors.New("not all environment variables are set")
 
 func ParseEnv(debug bool, defaults *types.EnvConfig) (types.EnvConfig, error) {
-	err := godotenv.Load()
-	if err != nil && debug {
+	if err := godotenv.Load(); err != nil && debug {
 		fmt.Println(fmt.Errorf("WARNING: %w", err))
 	}
-	err = nil
 
-	err = UnmarshalEnv(defaults)
+	err := UnmarshalEnv(defaults)
 	return *defaults, err
 }
 
