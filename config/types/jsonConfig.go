@@ -1,4 +1,4 @@
-package basicTypes
+package basictypes
 
 type JSONConfig interface {
 	HasExternalFile() bool

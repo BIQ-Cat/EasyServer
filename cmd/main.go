@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
+	"time"
 
 	"github.com/BIQ-Cat/easyserver/internal/db"
 	"github.com/BIQ-Cat/easyserver/internal/json"
@@ -38,8 +38,15 @@ func main() {
 
 	routes.Setup(root)
 
+	srv := &http.Server{
+		Handler:      root,
+		Addr:         fmt.Sprintf(":%d", config.EnvConfig.ServerPort),
+		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
 	fmt.Println("Server is running on port", config.EnvConfig.ServerPort)
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.EnvConfig.ServerPort), root))
+	log.Fatal(srv.ListenAndServe())
 }
 
 func loadEnv() {

@@ -3,11 +3,11 @@ package types
 import (
 	"time"
 
-	basicTypes "github.com/BIQ-Cat/easyserver/config/types"
+	basictypes "github.com/BIQ-Cat/easyserver/config/types"
 )
 
 type Config struct {
-	basicTypes.BasicConfig
+	basictypes.BasicConfig
 	Create              CreateConfig           `json:"create"`          // Configure data required to create account
 	OTPLength           int                    `json:"otpLength"`       // How long one-time password should be
 	Verify              VerificationConfig     `json:"verify"`          // Configure verification

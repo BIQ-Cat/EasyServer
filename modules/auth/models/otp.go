@@ -15,7 +15,7 @@ import (
 	// Configuration
 	config "github.com/BIQ-Cat/easyserver/config/base"
 
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 	moduleConfigFuncs "github.com/BIQ-Cat/easyserver/config/modules/auth/funcs"
 )
 
@@ -31,7 +31,7 @@ func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (
 		return utils.Message(false, "Account is already verified"), nil
 	}
 
-	if !moduleConfig.Config.Create.Email.Require {
+	if !moduleconfig.Config.Create.Email.Require {
 		return utils.Message(false, "Email verification is disabled on this server"), nil
 	}
 
@@ -48,11 +48,11 @@ func (a *Account) SendEmailOTP(email string, isVerification bool, host string) (
 
 	if isVerification {
 		controller = "verify-recieve"
-		subject = moduleConfig.Config.Verify.EmailSubject
+		subject = moduleconfig.Config.Verify.EmailSubject
 		template = "verify.html"
 	} else {
 		controller = "reset-password"
-		subject = moduleConfig.Config.RestorePassword.EmailSubject
+		subject = moduleconfig.Config.RestorePassword.EmailSubject
 		template = "reset.html"
 	}
 
@@ -89,7 +89,7 @@ func VerifyAccount(otp []byte) (map[string]interface{}, error) {
 		return utils.Message(false, "Account is already verified"), nil
 	}
 
-	if time.Since(acc.TimeVerificationOTPSet) > moduleConfig.Config.Verify.TokenLifetime {
+	if time.Since(acc.TimeVerificationOTPSet) > moduleconfig.Config.Verify.TokenLifetime {
 		return utils.Message(false, "Token has expired"), nil
 	}
 
@@ -126,7 +126,7 @@ func ResetPassword(otp, password []byte) (map[string]interface{}, error) {
 		return utils.Message(false, "No user with such token"), nil
 	}
 
-	if time.Since(acc.TimeForgotPasswordOTPSet) > moduleConfig.Config.RestorePassword.TokenLifetime {
+	if time.Since(acc.TimeForgotPasswordOTPSet) > moduleconfig.Config.RestorePassword.TokenLifetime {
 		return utils.Message(false, "Token has expired"), nil
 	}
 
@@ -175,12 +175,12 @@ func (a *Account) setOTP(isVerification bool) (string, map[string]interface{}, e
 	if isVerification {
 		otp = &a.VerificationOTP
 		otpSet = &a.TimeVerificationOTPSet
-		resendTimer = moduleConfig.Config.Verify.ResendTimer
+		resendTimer = moduleconfig.Config.Verify.ResendTimer
 		fieldName = "verification_otp"
 	} else {
 		otp = &a.RestorePasswordOTP
 		otpSet = &a.TimeForgotPasswordOTPSet
-		resendTimer = moduleConfig.Config.RestorePassword.ResendTimer
+		resendTimer = moduleconfig.Config.RestorePassword.ResendTimer
 		fieldName = "restore_password_otp"
 	}
 
@@ -190,7 +190,7 @@ func (a *Account) setOTP(isVerification bool) (string, map[string]interface{}, e
 
 	*otp = ""
 
-	otpToken := utils.RandomText(moduleConfig.Config.OTPLength)
+	otpToken := utils.RandomText(moduleconfig.Config.OTPLength)
 	salt := []byte(config.EnvConfig.OTPPassword)
 	for {
 		newOTP := base64.StdEncoding.EncodeToString(pbkdf2.Key(otpToken, salt, 4096, 32, sha256.New))
@@ -201,7 +201,7 @@ func (a *Account) setOTP(isVerification bool) (string, map[string]interface{}, e
 		}
 
 		if ok {
-			otpToken = utils.RandomText(moduleConfig.Config.OTPLength)
+			otpToken = utils.RandomText(moduleconfig.Config.OTPLength)
 			continue
 		}
 

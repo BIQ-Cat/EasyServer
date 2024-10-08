@@ -5,7 +5,7 @@ import (
 
 	config "github.com/BIQ-Cat/easyserver/config/base"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/postgres" // Enable postgres driver
 )
 
 var db *gorm.DB
@@ -18,9 +18,9 @@ func Connect() error {
 	dbHost := config.EnvConfig.DBHost
 	dbPort := config.EnvConfig.DBPort
 
-	dbUri := fmt.Sprintf("host=%s user=%s dbname=%s port=%d sslmode=disable password=%s", dbHost, username, dbName, dbPort, password) //Создать строку подключения
+	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s port=%d sslmode=disable password=%s", dbHost, username, dbName, dbPort, password) //Создать строку подключения
 
-	conn, err := gorm.Open("postgres", dbUri)
+	conn, err := gorm.Open("postgres", dbURI)
 	if err != nil {
 		return err
 	}
