@@ -7,32 +7,31 @@ import (
 	"github.com/jinzhu/gorm"
 
 	// Internals
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 	"github.com/BIQ-Cat/easyserver/internal/db"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
-
 	// Configuration
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func (a *Account) Validate() (msg map[string]interface{}, ok bool) {
 	ok = true
 	msg = nil
 
-	if a.Email == "" && moduleConfig.Config.Create.IsEmailRequired(a.Phone) {
+	if a.Email == "" && moduleconfig.Config.Create.IsEmailRequired(a.Phone) {
 		return utils.Message(false, "Email address is required"), false
 	} else if a.Email != "" {
 		msg, ok = a.validateEmail()
 	}
 
-	if a.Phone == "" && moduleConfig.Config.Create.IsPhoneRequired(a.Email) {
+	if a.Phone == "" && moduleconfig.Config.Create.IsPhoneRequired(a.Email) {
 		return utils.Message(false, "Phone number is required"), false
 	} else if a.Phone != "" {
 		msg, ok = a.validatePhoneNumber()
 	}
 
-	if a.Password == "" && !moduleConfig.Config.Verify.SetPasswordAfter {
+	if a.Password == "" && !moduleconfig.Config.Verify.SetPasswordAfter {
 		return utils.Message(false, "Password is required"), false
-	} else if a.Password != "" && !moduleConfig.Config.Verify.SetPasswordAfter {
+	} else if a.Password != "" && !moduleconfig.Config.Verify.SetPasswordAfter {
 		msg, ok = a.validatePassword()
 	}
 
@@ -40,7 +39,7 @@ func (a *Account) Validate() (msg map[string]interface{}, ok bool) {
 		return
 	}
 
-	if !moduleConfig.Config.Create.DisableUsername {
+	if !moduleconfig.Config.Create.DisableUsername {
 		msg, ok = a.validateUsername()
 	}
 	return
