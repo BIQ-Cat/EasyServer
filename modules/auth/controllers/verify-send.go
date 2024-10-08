@@ -15,7 +15,7 @@ import (
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 
 	// Configuration
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func init() {
@@ -33,7 +33,7 @@ func init() {
 
 		var resp map[string]interface{}
 
-		if r.URL.Query().Has("email") && moduleConfig.Config.Create.Email.Require {
+		if r.URL.Query().Has("email") && moduleconfig.Config.Create.Email.Require {
 			resp, err = acc.SendEmailOTP(r.URL.Query().Get("email"), true, r.Host)
 		} else {
 			utils.Respond(w, utils.Message(false, "Invalid request"))

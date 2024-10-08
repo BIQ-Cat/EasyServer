@@ -1,11 +1,11 @@
-package moduleConfig
+package moduleconfig
 
 import (
 	"time"
 
 	"github.com/BIQ-Cat/easyserver/config/modules/auth/funcs"
 	"github.com/BIQ-Cat/easyserver/config/modules/auth/types"
-	basicTypes "github.com/BIQ-Cat/easyserver/config/types"
+	basictypes "github.com/BIQ-Cat/easyserver/config/types"
 )
 
 var Config = types.Config{
@@ -36,7 +36,7 @@ var Config = types.Config{
 	},
 	OTPLength: 6,
 
-	BasicConfig: basicTypes.BasicConfig{
+	BasicConfig: basictypes.BasicConfig{
 		RewriteWithJSON: true,
 	},
 }
