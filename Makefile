@@ -104,6 +104,11 @@ lint: deps ## Lint the source files
 	golangci-lint run --timeout 5m -E revive,gosec
 .PHONY: lint
 
+test: dep ## Run tests
+	go test -race -p 1 -timeout 300s -coverprofile=.test_coverage.txt ./... && \
+    	go tool cover -func=.test_coverage.txt | tail -n1 | awk '{print "Total test coverage: " $$3}'
+	@rm .test_coverage.txt
+
 ######################
 ####### FILES ########
 ######################
