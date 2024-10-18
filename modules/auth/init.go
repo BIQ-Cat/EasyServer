@@ -13,8 +13,8 @@ import (
 	"github.com/BIQ-Cat/easyserver/internal/routes"
 
 	// Configuration
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
-	basicTypes "github.com/BIQ-Cat/easyserver/config/types"
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
+	basictypes "github.com/BIQ-Cat/easyserver/config/types"
 )
 
 func init() {
@@ -22,6 +22,6 @@ func init() {
 	middlewares.Middlewares = append(middlewares.Middlewares, app.JWTAuthentication)
 	routes.Routes["auth"] = &controllers.Route
 
-	var cfg basicTypes.JSONConfig = moduleConfig.Config
+	var cfg basictypes.JSONConfig = moduleconfig.Config
 	json.Configurations = append(json.Configurations, &cfg)
 }

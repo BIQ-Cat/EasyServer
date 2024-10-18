@@ -117,15 +117,15 @@ func parseInt(raw string, bits int, errorStart string) (reflect.Value, error) {
 	}
 	switch bits {
 	case 0:
-		return reflect.ValueOf(int(value)), nil
+		return reflect.ValueOf(int(value)), nil // #nosec G115
 	case 8:
-		return reflect.ValueOf(int8(value)), nil
+		return reflect.ValueOf(int8(value)), nil // #nosec G115
 	case 16:
-		return reflect.ValueOf(int16(value)), nil
+		return reflect.ValueOf(int16(value)), nil // #nosec G115
 	case 32:
-		return reflect.ValueOf(int32(value)), nil
+		return reflect.ValueOf(int32(value)), nil // #nosec G115
 	case 64:
-		return reflect.ValueOf(int64(value)), nil
+		return reflect.ValueOf(int64(value)), nil // #nosec G115
 	default:
 		panic("bad bits")
 	}
@@ -139,15 +139,15 @@ func parseUint(raw string, bits int, errorStart string) (reflect.Value, error) {
 	}
 	switch bits {
 	case 0:
-		return reflect.ValueOf(uint(value)), nil
+		return reflect.ValueOf(uint(value)), nil // #nosec G115
 	case 8:
-		return reflect.ValueOf(uint8(value)), nil
+		return reflect.ValueOf(uint8(value)), nil // #nosec G115
 	case 16:
-		return reflect.ValueOf(uint16(value)), nil
+		return reflect.ValueOf(uint16(value)), nil // #nosec G115
 	case 32:
-		return reflect.ValueOf(uint32(value)), nil
+		return reflect.ValueOf(uint32(value)), nil // #nosec G115
 	case 64:
-		return reflect.ValueOf(uint64(value)), nil
+		return reflect.ValueOf(uint64(value)), nil // #nosec G115
 	default:
 		panic("bad bits")
 	}
