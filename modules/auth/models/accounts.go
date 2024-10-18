@@ -14,7 +14,7 @@ import (
 )
 
 type Token struct {
-	UserId   uint
+	UserID   uint
 	Verified bool
 	jwt.RegisteredClaims
 }
@@ -46,7 +46,7 @@ func GetUser(u uint) *Account {
 }
 
 func (a *Account) generateToken() error {
-	tk := &Token{UserId: a.ID, Verified: a.Verified}
+	tk := &Token{UserID: a.ID, Verified: a.Verified}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, err := token.SignedString([]byte(config.EnvConfig.TokenPassword))
 	if err != nil {
