@@ -18,7 +18,7 @@ import (
 
 	// Configuration
 	config "github.com/BIQ-Cat/easyserver/config/base"
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 type UserKey struct{}
@@ -50,7 +50,7 @@ func JWTAuthentication(next http.Handler) http.Handler {
 
 		tokenPart := bearerToken[1]
 		tk := &models.Token{}
-		token, err := jwt.ParseWithClaims(tokenPart, tk, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenPart, tk, func(_ *jwt.Token) (interface{}, error) {
 			return []byte(config.EnvConfig.TokenPassword), nil
 		})
 
@@ -70,7 +70,7 @@ func JWTAuthentication(next http.Handler) http.Handler {
 		}
 
 		if config.Config.Debug {
-			fmt.Printf("User %v\n", tk.UserId)
+			fmt.Printf("User %v\n", tk.UserID)
 		}
 
 		if verificationRequired(*tk, r.URL.Path, controller) {
@@ -81,7 +81,7 @@ func JWTAuthentication(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), UserKey{}, tk.UserId)
+		ctx := context.WithValue(r.Context(), UserKey{}, tk.UserID)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
@@ -89,5 +89,5 @@ func JWTAuthentication(next http.Handler) http.Handler {
 
 func verificationRequired(tk models.Token, path string, c *routes.Controller) bool {
 	_, ok := c.Data[datakeys.RequireVerification]
-	return !tk.Verified && (moduleConfig.Config.Verify.Require && path != "/auth/verify-send" && path != "/auth/verify-recieve" || !ok)
+	return !tk.Verified && (moduleconfig.Config.Verify.Require && path != "/auth/verify-send" && path != "/auth/verify-recieve" || ok)
 }

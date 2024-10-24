@@ -13,7 +13,7 @@ import (
 
 	// Configuration
 	config "github.com/BIQ-Cat/easyserver/config/base"
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func (a *Account) Create() (map[string]interface{}, error) {
@@ -21,9 +21,9 @@ func (a *Account) Create() (map[string]interface{}, error) {
 		return msg, nil
 	}
 
-	a.Verified = !moduleConfig.Config.Create.Email.Require && !moduleConfig.Config.Create.Phone.Require
+	a.Verified = !moduleconfig.Config.Create.Email.Require && !moduleconfig.Config.Create.Phone.Require
 
-	if !moduleConfig.Config.Verify.SetPasswordAfter {
+	if !moduleconfig.Config.Verify.SetPasswordAfter {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(a.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return nil, err
@@ -53,13 +53,13 @@ func Login(login, password string) (map[string]interface{}, error) {
 	var err error
 	fields := make([]string, 3)
 
-	if !moduleConfig.Config.Create.DisableUsername {
+	if !moduleconfig.Config.Create.DisableUsername {
 		fields = append(fields, "username")
 	}
-	if moduleConfig.Config.Create.Email.UseAsLogin {
+	if moduleconfig.Config.Create.Email.UseAsLogin {
 		fields = append(fields, "email")
 	}
-	if moduleConfig.Config.Create.Phone.UseAsLogin {
+	if moduleconfig.Config.Create.Phone.UseAsLogin {
 		fields = append(fields, "phone")
 	}
 
@@ -75,10 +75,10 @@ func Login(login, password string) (map[string]interface{}, error) {
 			}
 			if config.Config.Debug {
 				return nil, err
-			} else {
-				log.Println(fmt.Errorf("ERROR: Login: Check username: %w", err))
-				return utils.Message(false, "Connection error. Please retry"), nil
 			}
+
+			log.Println(fmt.Errorf("ERROR: Login: Check username: %w", err))
+			return utils.Message(false, "Connection error. Please retry"), nil
 		}
 		break
 	}
@@ -87,7 +87,7 @@ func Login(login, password string) (map[string]interface{}, error) {
 		return utils.Message(false, "Login not found"), nil
 	}
 
-	if !moduleConfig.Config.Verify.SetPasswordAfter || account.Verified {
+	if !moduleconfig.Config.Verify.SetPasswordAfter || account.Verified {
 
 		err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))
 		if err != nil {

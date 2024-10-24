@@ -1,5 +1,5 @@
 package json
 
-import basicTypes "github.com/BIQ-Cat/easyserver/config/types"
+import basictypes "github.com/BIQ-Cat/easyserver/config/types"
 
-var Configurations = []*basicTypes.JSONConfig{}
+var Configurations = []*basictypes.JSONConfig{}

@@ -6,6 +6,8 @@ import (
 	"github.com/jinzhu/gorm"
 
 	// Modules
+
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 	"github.com/BIQ-Cat/easyserver/modules/auth/app"
 	"github.com/BIQ-Cat/easyserver/modules/auth/datakeys"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
@@ -14,9 +16,7 @@ import (
 	"github.com/BIQ-Cat/easyserver/internal/db"
 	"github.com/BIQ-Cat/easyserver/internal/routes"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
-
 	// Configuration
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func init() {
@@ -34,7 +34,7 @@ func init() {
 
 		var resp map[string]interface{}
 
-		if r.URL.Query().Has("email") && moduleConfig.Config.Create.Email.Require {
+		if r.URL.Query().Has("email") && moduleconfig.Config.Create.Email.Require {
 			resp, err = acc.SendEmailOTP(r.URL.Query().Get("email"), false, r.Host)
 		} else {
 			utils.Respond(w, utils.Message(false, "Invalid request"))

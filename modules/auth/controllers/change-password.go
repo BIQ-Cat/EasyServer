@@ -6,6 +6,8 @@ import (
 	"github.com/jinzhu/gorm"
 
 	// Modules
+
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 	"github.com/BIQ-Cat/easyserver/modules/auth/app"
 	"github.com/BIQ-Cat/easyserver/modules/auth/datakeys"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
@@ -14,9 +16,7 @@ import (
 	"github.com/BIQ-Cat/easyserver/internal/db"
 	"github.com/BIQ-Cat/easyserver/internal/routes"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
-
 	// Configuration
-	moduleConfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 			return
 		}
 
-		if !moduleConfig.Config.Verify.SetPasswordAfter || acc.Password != "" {
+		if !moduleconfig.Config.Verify.SetPasswordAfter || acc.Password != "" {
 			utils.Respond(w, utils.Message(false, "Forbidden"))
 			return
 		}
