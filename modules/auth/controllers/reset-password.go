@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	// Modules
+
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
@@ -73,8 +74,7 @@ func init() {
 	}
 
 	Route["reset-password"] = routes.Controller{
-		Handler:     http.HandlerFunc(reset),
-		Methods:     []string{http.MethodGet, http.MethodPatch},
-		RequireAuth: false,
+		Handler: http.HandlerFunc(reset),
+		Methods: []string{http.MethodGet, http.MethodPatch},
 	}
 }

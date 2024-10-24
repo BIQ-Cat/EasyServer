@@ -7,6 +7,7 @@ import (
 
 	// Modules
 	"github.com/BIQ-Cat/easyserver/modules/auth/app"
+	"github.com/BIQ-Cat/easyserver/modules/auth/datakeys"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
@@ -55,8 +56,10 @@ func init() {
 	}
 
 	Route["change-password"] = routes.Controller{
-		Handler:     http.HandlerFunc(changePassword),
-		Methods:     []string{http.MethodPost},
-		RequireAuth: true,
+		Handler: http.HandlerFunc(changePassword),
+		Methods: []string{http.MethodPost},
+		Data: map[string]any{
+			datakeys.RequireAuth: true,
+		},
 	}
 }

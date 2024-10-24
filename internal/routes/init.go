@@ -6,11 +6,10 @@ import (
 
 type Controller struct {
 	http.Handler
-	Methods             []string
-	Headers             []string
-	Schemas             []string
-	RequireAuth         bool
-	RequireVerification bool
+	Methods []string
+	Headers []string
+	Schemas []string
+	Data    map[string]any
 }
 
 type Route map[string]Controller

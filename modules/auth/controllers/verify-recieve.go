@@ -53,8 +53,7 @@ func init() {
 	}
 
 	Route["verify-recieve"] = routes.Controller{
-		Handler:     http.HandlerFunc(verifyOTP),
-		Methods:     []string{"GET"},
-		RequireAuth: false,
+		Handler: http.HandlerFunc(verifyOTP),
+		Methods: []string{"GET"},
 	}
 }
