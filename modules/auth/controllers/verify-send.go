@@ -7,6 +7,7 @@ import (
 
 	// Modules
 	"github.com/BIQ-Cat/easyserver/modules/auth/app"
+	"github.com/BIQ-Cat/easyserver/modules/auth/datakeys"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
@@ -48,8 +49,10 @@ func init() {
 	}
 
 	Route["verify-send"] = routes.Controller{
-		Handler:     http.HandlerFunc(sendOTP),
-		Methods:     []string{"GET"},
-		RequireAuth: true,
+		Handler: http.HandlerFunc(sendOTP),
+		Methods: []string{"GET"},
+		Data: map[string]any{
+			datakeys.RequireVerification: true,
+		},
 	}
 }
