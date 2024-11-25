@@ -3,7 +3,6 @@ package moduleconfig
 import (
 	"time"
 
-	"github.com/BIQ-Cat/easyserver/config/modules/auth/funcs"
 	"github.com/BIQ-Cat/easyserver/config/modules/auth/types"
 	basictypes "github.com/BIQ-Cat/easyserver/config/types"
 )
@@ -31,9 +30,9 @@ var Config = types.Config{
 		TokenLifetime: 2 * time.Hour,
 	},
 
-	OAuthConfigsEnabled: map[string]types.OAuthConfig{
-		"google": funcs.OAuthGoogleConfig(),
-	},
+	// OAuthConfigsEnabled: map[string]types.OAuthConfig{
+	// 	"google": funcs.OAuthGoogleConfig(),
+	// },
 	OTPLength: 6,
 
 	BasicConfig: basictypes.BasicConfig{

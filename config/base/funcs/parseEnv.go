@@ -24,34 +24,9 @@ func ParseEnv(debug bool, defaults *types.EnvConfig) (types.EnvConfig, error) {
 }
 
 func UnmarshalEnv(cfg *types.EnvConfig) error {
-	fields := make(map[string]reflect.Value)
-	defaults := make(map[string]reflect.Value)
-	cfgValue := reflect.ValueOf(cfg).Elem()
-	for i := 0; i < cfgValue.NumField(); i++ {
-		fieldInfo := cfgValue.Type().Field(i)
-		tag := fieldInfo.Tag
-		name := tag.Get("name")
-		if name == "" {
-			name = strings.ToUpper(fieldInfo.Name)
-		}
-
-		v := cfgValue.Field(i)
-		fields[name] = v
-
-		if reflect.Zero(fieldInfo.Type).Interface() == v.Interface() {
-			zero, ok := tag.Lookup("default")
-			if ok {
-				zeroV, err := parseString(zero, fieldInfo.Type.Kind(), fieldInfo.Name, "default value of "+fieldInfo.Name)
-				if err != nil {
-					return err
-				}
-
-				defaults[name] = zeroV
-			}
-		} else {
-			defaults[name] = v
-		}
-
+	fields, defaults, err := getDefaults(cfg)
+	if err != nil {
+		return err
 	}
 
 	for name, v := range fields {
@@ -73,6 +48,24 @@ func UnmarshalEnv(cfg *types.EnvConfig) error {
 	}
 
 	return nil
+}
+
+func EnvConfigToMap(cfg *types.EnvConfig) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+	fields, defaults, err := getDefaults(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	for key := range fields {
+		val, ok := defaults[key]
+		if !ok {
+			result[key] = nil
+		} else {
+			result[key] = val.Interface()
+		}
+	}
+	return result, nil
 }
 
 func parseString(raw string, kind reflect.Kind, name string, errorStart string) (value reflect.Value, err error) {
@@ -106,6 +99,39 @@ func parseString(raw string, kind reflect.Kind, name string, errorStart string) 
 		err = nil
 	default:
 		panic(fmt.Sprintf("unsupported type of %s", name))
+	}
+	return
+}
+
+func getDefaults(cfg *types.EnvConfig) (fields map[string]reflect.Value, defaults map[string]reflect.Value, err error) {
+	fields = make(map[string]reflect.Value)
+	defaults = make(map[string]reflect.Value)
+	cfgValue := reflect.ValueOf(cfg).Elem()
+	for i := 0; i < cfgValue.NumField(); i++ {
+		fieldInfo := cfgValue.Type().Field(i)
+		tag := fieldInfo.Tag
+		name := tag.Get("name")
+		if name == "" {
+			name = strings.ToUpper(fieldInfo.Name)
+		}
+
+		v := cfgValue.Field(i)
+		fields[name] = v
+
+		if reflect.Zero(fieldInfo.Type).Interface() == v.Interface() {
+			zero, ok := tag.Lookup("default")
+			if ok {
+				zeroV, err := parseString(zero, fieldInfo.Type.Kind(), fieldInfo.Name, "default value of "+fieldInfo.Name)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				defaults[name] = zeroV
+			}
+		} else {
+			defaults[name] = v
+		}
+
 	}
 	return
 }

@@ -29,3 +29,6 @@ tmp/
 
 # Makefile builds
 build/
+
+# Python venv
+.venv/
