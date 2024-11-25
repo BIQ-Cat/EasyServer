@@ -8,6 +8,7 @@ import uuid
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QTableWidgetItem, QInputDialog, QMessageBox
 from psycopg2 import Error
+from dotenv import dotenv_values
 from ui.lib.db import Database
 from ui.lib import date_dialogs
 from ui.frame import Ui_Form
@@ -55,7 +56,6 @@ class JsonField(QTreeWidgetItem):
         self.currentTable = None
         super().__init__(parent)
         self.setText(0, path[-1])
-        print(GetEnvironmentConfiguration())
 
     def createChild(self, field: str, value: typing.Any) -> typing.Self:
         return JsonField(self, self.file, [*self.path, field], value,
@@ -98,7 +98,7 @@ class Project(QWidget, Ui_Form):
         self.setupUi(self)
 
         self.setupConfiguration()
-        self.setupDatabase()
+        # self.setupDatabase()
 
     def setupConfiguration(self):
         if not os.path.exists(self.configPath):
@@ -357,3 +357,25 @@ class Project(QWidget, Ui_Form):
                 self.updateTable()
             except Error as e:
                 QMessageBox.critical(self, "Ошибка базы данных", str(e))
+    
+
+    def setupEnv(self):
+        filepath = os.path.join(self.dir, '.env')
+        if not os.path.exists(filepath):
+            with open(filepath, 'w'):
+                pass
+        
+        env = dotenv_values(filepath)
+        defaults = GetEnvironmentConfiguration()
+        keys = sorted(defaults.keys())
+        self.envTable.setVerticalHeaderLabels(sorted(defaults.keys()))
+        for i, key in enumerate(keys):
+            if defaults[key] is not None:
+                el = QTableWidgetItem(str(defaults[key]))
+                el.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                self.envTable.setItem(i, 1, el)
+            el = QTableWidgetItem(env[key] if key in env else '')
+            el.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable)
+            self.envTable.setItem(i, 0, el)
+            
+            

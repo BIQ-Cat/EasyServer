@@ -1,7 +1,13 @@
 import ctypes
 import os
 import json
+import platform
 
+dll_path = "./easyserver"
+if platform.system() == 'Windows':
+    dll_path += '.dll'
+else:
+    dll_path += '.so'
 
 class GoSideError(Exception):
     pass
@@ -16,7 +22,7 @@ class GetConfiguration_return(ctypes.Structure):
 
 
 def GetDefaultModuleConfiguration(module: str) -> tuple[bytes, bool]:
-    lib = ctypes.cdll.LoadLibrary(os.path.abspath("./easyserver.so"))
+    lib = ctypes.cdll.LoadLibrary(os.path.abspath(dll_path))
     lib.GetDefaultModuleConfiguration.argtypes = [GoString]
     lib.GetDefaultModuleConfiguration.restype = GetConfiguration_return
     moduleBytes = module.encode()
@@ -25,8 +31,8 @@ def GetDefaultModuleConfiguration(module: str) -> tuple[bytes, bool]:
     return (res.r0, res.r1)
 
 
-def GetEnvironmentConfiguration() -> dict[str, int | float | str]:
-    lib = ctypes.cdll.LoadLibrary(os.path.abspath("./easyserver.so"))
+def GetEnvironmentConfiguration() -> dict[str, int | float | str | None]:
+    lib = ctypes.cdll.LoadLibrary(os.path.abspath(dll_path))
     lib.GetEnvironmentConfiguration.restype = GetConfiguration_return
 
     res = lib.GetEnvironmentConfiguration()
