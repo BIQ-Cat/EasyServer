@@ -8,11 +8,11 @@ import uuid
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QTableWidgetItem, QInputDialog, QMessageBox
 from psycopg2 import Error
-from dotenv import dotenv_values
+from dotenv import dotenv_values, set_key, unset_key
 from ui.lib.db import Database
 from ui.lib import date_dialogs
 from ui.frame import Ui_Form
-from setup import GetDefaultModuleConfiguration, GetEnvironmentConfiguration
+import goffi
 
 STR = 8
 INT = 4
@@ -89,6 +89,8 @@ class DBField(QTableWidgetItem):
 
 class Project(QWidget, Ui_Form):
 
+    MODULE_PART_INDEX = 0
+
     def __init__(self, dir):
         self.dir = dir
         self.configPath = os.path.join(dir, 'EasyConfig')
@@ -98,37 +100,37 @@ class Project(QWidget, Ui_Form):
         self.setupUi(self)
 
         self.setupConfiguration()
-        # self.setupDatabase()
+        self.setupDatabase()
+        self.setupEnv()
 
     def setupConfiguration(self):
         if not os.path.exists(self.configPath):
             os.mkdir(self.configPath)
 
-        for i in range(self.treeWidget.topLevelItemCount()):
-            part = self.treeWidget.topLevelItem(i)
-            if not (os.path.exists(
-                    os.path.join(self.configPath,
-                                 part.text(0).lower()))):
-                os.mkdir(os.path.join(self.configPath, part.text(0).lower()))
+        modulePart = self.treeWidget.topLevelItem(self.MODULE_PART_INDEX)
+        modules = goffi.ListModules()
+        for module in modules:
+            aspect = QTreeWidgetItem(modulePart)
+            aspect.setText(0, module.capitalize())
+            modulePart.addChild(aspect)
 
-            for j in range(part.childCount()):
-                aspect = part.child(j)
-                filepath = os.path.join(self.configPath,
-                                        part.text(0).lower(),
-                                        aspect.text(0).lower() + '.json')
-                if not os.path.exists(filepath):
-                    with open(filepath, 'wb') as f:
-                        content, ok = GetDefaultModuleConfiguration(
-                            aspect.text(0).lower())
-                        if not ok:
-                            content = json.dumps(self.buildDict(aspect),
-                                                 indent=2).encode()
+            filepath = os.path.join(self.configPath, "modules",
+                                    module + '.json')
 
-                        f.write(content)
+            if not os.path.exists(filepath):
+                with open(filepath, 'wb') as f:
+                    content, ok = goffi.GetDefaultModuleConfiguration(module)
+                    if not ok:
+                        content = json.dumps(self.buildDict(aspect),
+                                             indent=2).encode()
 
-                with open(filepath) as f:
-                    data = json.load(f)
-                    self.updateAspect(i, j, data, filepath)
+                    f.write(content)
+
+            with open(filepath) as f:
+                data = json.load(f)
+                self.updateAspect(self.MODULE_PART_INDEX,
+                                  modulePart.indexOfChild(aspect), data,
+                                  filepath)
 
         self.treeWidget.itemDoubleClicked.connect(self.changeField)
 
@@ -247,6 +249,12 @@ class Project(QWidget, Ui_Form):
         return root
 
     def setupDatabase(self):
+        items = goffi.ListModels()
+
+        self.tableChooser.removeItem(1)
+        for model_name in items:
+            self.tableChooser.addItem(model_name)
+
         self.tableChooser.currentIndexChanged.connect(self.changeTable)
         self.tableWidget.cellDoubleClicked.connect(self.editCell)
 
@@ -357,25 +365,38 @@ class Project(QWidget, Ui_Form):
                 self.updateTable()
             except Error as e:
                 QMessageBox.critical(self, "Ошибка базы данных", str(e))
-    
 
     def setupEnv(self):
         filepath = os.path.join(self.dir, '.env')
         if not os.path.exists(filepath):
             with open(filepath, 'w'):
                 pass
-        
+
+        self.envPath = filepath
+
         env = dotenv_values(filepath)
-        defaults = GetEnvironmentConfiguration()
+        defaults = goffi.GetEnvironmentConfiguration()
         keys = sorted(defaults.keys())
+        self.envTable.setRowCount(len(keys))
         self.envTable.setVerticalHeaderLabels(sorted(defaults.keys()))
         for i, key in enumerate(keys):
             if defaults[key] is not None:
                 el = QTableWidgetItem(str(defaults[key]))
-                el.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+                el.setFlags(Qt.ItemFlag.ItemIsEnabled
+                            | Qt.ItemFlag.ItemIsSelectable)
                 self.envTable.setItem(i, 1, el)
             el = QTableWidgetItem(env[key] if key in env else '')
-            el.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable)
+            el.setFlags(Qt.ItemFlag.ItemIsEnabled
+                        | Qt.ItemFlag.ItemIsSelectable
+                        | Qt.ItemFlag.ItemIsEditable)
             self.envTable.setItem(i, 0, el)
-            
-            
+
+        self.envTable.cellChanged.connect(self.changeEnv)
+
+    def changeEnv(self, row, col):
+        data = self.envTable.item(row, col).text()
+        key = self.envTable.verticalHeaderItem(row).text()
+        if data == '':
+            unset_key(self.envPath, key)
+        else:
+            set_key(self.envPath, key, data)

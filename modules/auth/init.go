@@ -1,27 +1,33 @@
 package auth
 
 import (
+	"github.com/gorilla/mux"
+
 	// Modules
 	"github.com/BIQ-Cat/easyserver/modules/auth/app"
 	"github.com/BIQ-Cat/easyserver/modules/auth/controllers"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/db"
-	"github.com/BIQ-Cat/easyserver/internal/json"
-	"github.com/BIQ-Cat/easyserver/internal/middlewares"
-	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver/internal/addons"
 
 	// Configuration
 	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 	basictypes "github.com/BIQ-Cat/easyserver/config/types"
 )
 
-func init() {
-	db.ModelsList = append(db.ModelsList, models.Account{})
-	middlewares.Middlewares = append(middlewares.Middlewares, app.JWTAuthentication)
-	routes.Routes["auth"] = &controllers.Route
+var cfg basictypes.JSONConfig = moduleconfig.Config
 
-	var cfg basictypes.JSONConfig = moduleconfig.Config
-	json.Configurations = append(json.Configurations, &cfg)
+var Module = addons.Module{
+	Middlewares:   []mux.MiddlewareFunc{app.JWTAuthentication},
+	Models:        []interface{}{models.Account{}},
+	Route:         &controllers.Route,
+	Configuration: &cfg,
+}
+
+func init() {
+	ok := Module.Register("auth", "auth")
+	if !ok {
+		panic("module auth already registered")
+	}
 }

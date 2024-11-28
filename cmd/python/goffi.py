@@ -2,12 +2,14 @@ import ctypes
 import os
 import json
 import platform
+import inflect
 
 dll_path = "./easyserver"
 if platform.system() == 'Windows':
     dll_path += '.dll'
 else:
     dll_path += '.so'
+
 
 class GoSideError(Exception):
     pass
@@ -19,6 +21,11 @@ class GoString(ctypes.Structure):
 
 class GetConfiguration_return(ctypes.Structure):
     _fields_ = [('r0', ctypes.c_char_p), ('r1', ctypes.c_bool)]
+
+
+class List_return(ctypes.Structure):
+    _fields_ = [('r0', ctypes.c_size_t),
+                ('r1', ctypes.POINTER(ctypes.c_char_p))]
 
 
 def GetDefaultModuleConfiguration(module: str) -> tuple[bytes, bool]:
@@ -40,3 +47,20 @@ def GetEnvironmentConfiguration() -> dict[str, int | float | str | None]:
         raise GoSideError
 
     return json.loads(res.r0)
+
+
+def ListModels() -> list[str]:
+    p = inflect.engine()
+    lib = ctypes.cdll.LoadLibrary(os.path.abspath(dll_path))
+    lib.ListModels.restype = List_return
+
+    res = lib.ListModels()
+    return sorted(p.plural_noun(res.r1[i].decode()) for i in range(res.r0))
+
+
+def ListModules() -> list[str]:
+    lib = ctypes.cdll.LoadLibrary(os.path.abspath(dll_path))
+    lib.ListModules.restype = List_return
+
+    res = lib.ListModules()
+    return sorted(res.r1[i].decode() for i in range(res.r0))

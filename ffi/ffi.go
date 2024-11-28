@@ -4,27 +4,27 @@ import "C"
 
 import (
 	"encoding/json"
+	"reflect"
+	"unsafe"
 
 	config "github.com/BIQ-Cat/easyserver/config/base"
 	"github.com/BIQ-Cat/easyserver/config/base/funcs"
-	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
-	basictypes "github.com/BIQ-Cat/easyserver/config/types"
-)
+	"github.com/BIQ-Cat/easyserver/internal/addons"
+	"github.com/BIQ-Cat/easyserver/internal/db"
 
-var Configs = map[string]basictypes.JSONConfig{
-	"auth": moduleconfig.Config,
-}
+	_ "github.com/BIQ-Cat/easyserver/config/modules"
+)
 
 //export GetDefaultModuleConfiguration
 func GetDefaultModuleConfiguration(moduleName string) (data *C.char, ok bool) {
-	var cfg basictypes.JSONConfig
-	cfg, ok = Configs[moduleName]
-	if !ok || !cfg.HasExternalFile() {
+	var module *addons.Module
+	module, ok = addons.GetModule(moduleName)
+	if !ok || module.Configuration == nil {
 		ok = false
 		return
 	}
 
-	res, err := json.MarshalIndent(&cfg, "", "  ")
+	res, err := json.MarshalIndent(module.Configuration, "", "  ")
 	if err != nil {
 		ok = false
 	}
@@ -47,6 +47,30 @@ func GetEnvironmentConfiguration() (data *C.char, ok bool) {
 	ok = true
 	data = C.CString(string(goData))
 	return
+}
+
+//export ListModels
+func ListModels() (C.size_t, **C.char) {
+	cArray := C.malloc(C.size_t(len(db.ModelsList)) * C.size_t(unsafe.Sizeof(uintptr(0))))
+	goSlice := unsafe.Slice((**C.char)(cArray), len(db.ModelsList))
+	for i, model := range db.ModelsList {
+		goSlice[i] = C.CString(reflect.TypeOf(model).Name())
+	}
+
+	return (C.size_t)(len(db.ModelsList)), (**C.char)(cArray)
+}
+
+//export ListModules
+func ListModules() (C.size_t, **C.char) {
+	moduleNames := addons.GetModuleNames()
+
+	cArray := C.malloc(C.size_t(len(moduleNames)) * C.size_t(unsafe.Sizeof(uintptr(0))))
+	goSlice := unsafe.Slice((**C.char)(cArray), len(moduleNames))
+	for i, module := range moduleNames {
+		goSlice[i] = C.CString(module)
+	}
+
+	return (C.size_t)(len(moduleNames)), (**C.char)(cArray)
 }
 
 func main() {}
