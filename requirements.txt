@@ -8,4 +8,3 @@ python-dotenv==1.0.1
 setuptools==75.5.0
 typeguard==4.4.1
 typing_extensions==4.12.2
-пш
