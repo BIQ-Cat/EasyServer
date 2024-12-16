@@ -27,7 +27,7 @@ func Setup(root *mux.Router) {
 				route.Schemes(handler.Schemas...)
 			}
 			if len(handler.Headers) != 0 {
-				route.Methods(handler.Headers...)
+				route.Headers(handler.Headers...)
 			}
 		}
 	}
