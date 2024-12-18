@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	// Modules
+	"github.com/BIQ-Cat/easyserver"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/routes"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 )
 
@@ -31,7 +31,7 @@ func init() {
 		utils.Respond(w, resp)
 	}
 
-	Route["login"] = routes.Controller{
+	Route["login"] = easyserver.Controller{
 		Handler: http.HandlerFunc(logIn),
 		Methods: []string{"POST"},
 	}

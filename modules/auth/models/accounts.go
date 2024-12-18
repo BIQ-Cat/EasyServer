@@ -7,7 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 
 	// Configuration
 	config "github.com/BIQ-Cat/easyserver/config/base"
@@ -36,7 +36,7 @@ type Account struct {
 func GetUser(u uint) *Account {
 
 	acc := &Account{}
-	db.GetDB().Table("accounts").Where("id = ?", u).First(acc)
+	router.DefaultRouter.DB().Table("accounts").Where("id = ?", u).First(acc)
 	if acc.Email == "" {
 		return nil
 	}
@@ -58,7 +58,7 @@ func (a *Account) generateToken() error {
 }
 
 func findUserByField(field, value string) (acc Account, ok bool, err error) {
-	err = db.GetDB().Table("accounts").Where(field+" = ?", value).First(&acc).Error
+	err = router.DefaultRouter.DB().Table("accounts").Where(field+" = ?", value).First(&acc).Error
 	if err == gorm.ErrRecordNotFound {
 		err = nil
 	} else if err == nil {
