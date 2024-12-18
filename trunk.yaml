@@ -1,6 +1,0 @@
-lint:
-  ignore:
-    - linters: [ALL]
-      paths:
-        # Ignore generated files
-        - cmd/python/ui/*.py
