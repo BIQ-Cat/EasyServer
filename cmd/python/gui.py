@@ -24,7 +24,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
 
     def closeTab(self, index: int):
         if index == 0:
-            msg = QMessageBox.warning(
+            QMessageBox.warning(
                 self,
                 "Inappropriate behavour",
                 "Нельзя закрывать эту вкладку!",
