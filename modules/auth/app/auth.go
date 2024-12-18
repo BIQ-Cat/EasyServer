@@ -27,7 +27,11 @@ type UserKey struct{}
 func JWTAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		controller := router.DefaultRouter.GetController(r.URL.Path)
-		if _, ok := controller.Data[datakeys.RequireAuth]; controller == nil || !ok {
+		var ok bool
+		if controller != nil {
+			_, ok = controller.Data[datakeys.RequireAuth]
+		}
+		if !ok {
 			next.ServeHTTP(w, r)
 			return
 		}
