@@ -1,9 +1,9 @@
-from datetime import date, time, datetime
+from datetime import date, datetime, time
 
 from PyQt6.QtWidgets import QDialog
 from ui.input_date import Ui_Dialog as Ui_Date
-from ui.input_time import Ui_Dialog as Ui_Time
 from ui.input_datetime import Ui_Dialog as Ui_DateTime
+from ui.input_time import Ui_Dialog as Ui_Time
 
 
 class DateDialog(QDialog, Ui_Date):
@@ -28,11 +28,9 @@ class TimeDialog(QDialog, Ui_Time):
 
 class DateTimeDialog(QDialog, Ui_DateTime):
 
-    def __init__(self,
-                 parent,
-                 title,
-                 default: datetime | None = None,
-                 label: str | None = None) -> None:
+    def __init__(
+        self, parent, title, default: datetime | None = None, label: str | None = None
+    ) -> None:
         super().__init__(parent)
         self.setWindowTitle(title)
         self.setupUi(self)

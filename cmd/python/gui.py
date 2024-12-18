@@ -1,8 +1,8 @@
-import sys
 import csv
+import sys
 from os import path
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox
 from ui.lib.project import Project
 from ui.ui import Ui_MainWindow
 
@@ -11,8 +11,8 @@ class MainApp(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         self.dirs = []
-        if path.exists(path.expanduser(path.join('~', 'data.csv'))):
-            with open(path.expanduser(path.join('~', 'data.csv'))) as f:
+        if path.exists(path.expanduser(path.join("~", "data.csv"))):
+            with open(path.expanduser(path.join("~", "data.csv"))) as f:
                 dirs = csv.reader(f)
                 self.dirs = next(dirs)
         super().__init__()
@@ -24,9 +24,12 @@ class MainApp(QMainWindow, Ui_MainWindow):
 
     def closeTab(self, index: int):
         if index == 0:
-            msg = QMessageBox.warning(self, "Inappropriate behavour",
-                                      "Нельзя закрывать эту вкладку!",
-                                      QMessageBox.StandardButton.Ok)
+            msg = QMessageBox.warning(
+                self,
+                "Inappropriate behavour",
+                "Нельзя закрывать эту вкладку!",
+                QMessageBox.StandardButton.Ok,
+            )
             return
         self.dirs.pop(index - 1)
         self.tabWidget.removeTab(index)
@@ -46,7 +49,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.tabWidget.setCurrentIndex(i)
 
     def closeEvent(self, event):
-        with open(path.expanduser(path.join('~', 'data.csv')), 'w') as f:
+        with open(path.expanduser(path.join("~", "data.csv")), "w") as f:
             w = csv.writer(f)
             w.writerow(self.dirs)
 

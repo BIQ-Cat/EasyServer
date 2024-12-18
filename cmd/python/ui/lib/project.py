@@ -1,18 +1,24 @@
-import os
-import json
-import typing
 import datetime
 import decimal
+import json
+import os
+import typing
 import uuid
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QTreeWidgetItem, QTableWidgetItem, QInputDialog, QMessageBox
-from psycopg2 import Error
-from dotenv import dotenv_values, set_key, unset_key
-from ui.lib.db import Database
-from ui.lib import date_dialogs
-from ui.frame import Ui_Form
 import goffi
+from dotenv import dotenv_values, set_key, unset_key
+from psycopg2 import Error
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QInputDialog,
+    QMessageBox,
+    QTableWidgetItem,
+    QTreeWidgetItem,
+    QWidget,
+)
+from ui.frame import Ui_Form
+from ui.lib import date_dialogs
+from ui.lib.db import Database
 
 STR = 8
 INT = 4
@@ -45,8 +51,15 @@ def set_value_type(obj):
 
 class JsonField(QTreeWidgetItem):
 
-    def __init__(self, parent: QWidget, file: str, path: list[str | int],
-                 value: typing.Any, partIndex: int, aspectIndex: int):
+    def __init__(
+        self,
+        parent: QWidget,
+        file: str,
+        path: list[str | int],
+        value: typing.Any,
+        partIndex: int,
+        aspectIndex: int,
+    ):
         self.file = file
         self.path = path
         self.value = value
@@ -58,20 +71,25 @@ class JsonField(QTreeWidgetItem):
         self.setText(0, path[-1])
 
     def createChild(self, field: str, value: typing.Any) -> typing.Self:
-        return JsonField(self, self.file, [*self.path, field], value,
-                         self.partIndex, self.aspectIndex)
+        return JsonField(
+            self,
+            self.file,
+            [*self.path, field],
+            value,
+            self.partIndex,
+            self.aspectIndex,
+        )
 
     def __str__(self) -> str:
-        field_name = ''
+        field_name = ""
         for el in reversed(self.path):
             if isinstance(el, int):
-                field_name = '[' + str(el) + ']' + field_name
+                field_name = "[" + str(el) + "]" + field_name
             else:
                 field_name = el + field_name
                 break
         else:
-            field_name = os.path.splitext(os.path.basename(
-                self.file))[0] + field_name
+            field_name = os.path.splitext(os.path.basename(self.file))[0] + field_name
 
         return field_name
 
@@ -93,9 +111,9 @@ class Project(QWidget, Ui_Form):
 
     def __init__(self, dir):
         self.dir = dir
-        self.configPath = os.path.join(dir, 'EasyConfig')
+        self.configPath = os.path.join(dir, "EasyConfig")
         self.db = Database("easy_server", "root", "admin", "localhost", 5432)
-        self.currentTable = ''
+        self.currentTable = ""
         super().__init__()
         self.setupUi(self)
 
@@ -114,35 +132,34 @@ class Project(QWidget, Ui_Form):
             aspect.setText(0, module.capitalize())
             modulePart.addChild(aspect)
 
-            filepath = os.path.join(self.configPath, "modules",
-                                    module + '.json')
+            filepath = os.path.join(self.configPath, "modules", module + ".json")
 
             if not os.path.exists(filepath):
-                with open(filepath, 'wb') as f:
+                with open(filepath, "wb") as f:
                     content, ok = goffi.GetDefaultModuleConfiguration(module)
                     if not ok:
-                        content = json.dumps(self.buildDict(aspect),
-                                             indent=2).encode()
+                        content = json.dumps(self.buildDict(aspect), indent=2).encode()
 
                     f.write(content)
 
             with open(filepath) as f:
                 data = json.load(f)
-                self.updateAspect(self.MODULE_PART_INDEX,
-                                  modulePart.indexOfChild(aspect), data,
-                                  filepath)
+                self.updateAspect(
+                    self.MODULE_PART_INDEX,
+                    modulePart.indexOfChild(aspect),
+                    data,
+                    filepath,
+                )
 
         self.treeWidget.itemDoubleClicked.connect(self.changeField)
 
-    def updateAspect(self, partIndex: int, aspectIndex: int, data: dict,
-                     file: str):
+    def updateAspect(self, partIndex: int, aspectIndex: int, data: dict, file: str):
         part = self.treeWidget.topLevelItem(partIndex)
         aspect = part.child(aspectIndex)
 
         new_aspect = QTreeWidgetItem(part)
         new_aspect.setText(0, aspect.text(0))
-        new_aspect = self.buildTree(data, new_aspect, file, [], partIndex,
-                                    aspectIndex)
+        new_aspect = self.buildTree(data, new_aspect, file, [], partIndex, aspectIndex)
         part.removeChild(aspect)
         part.insertChild(aspectIndex, new_aspect)
 
@@ -153,23 +170,27 @@ class Project(QWidget, Ui_Form):
         ok = False
         value = None
         if item.valueType == VALUE_TYPES[STR]:
-            value, ok = QInputDialog.getText(self,
-                                             str(item),
-                                             'Изменить текст:',
-                                             text=item.value)
+            value, ok = QInputDialog.getText(
+                self, str(item), "Изменить текст:", text=item.value
+            )
         elif item.valueType == VALUE_TYPES[INT]:
-            value, ok = QInputDialog.getInt(self, str(item), 'Изменить число:',
-                                            item.value)
+            value, ok = QInputDialog.getInt(
+                self, str(item), "Изменить число:", item.value
+            )
         elif item.valueType == VALUE_TYPES[FLOAT]:
-            value, ok = QInputDialog.getDouble(self, str(item),
-                                               'Изменить число:', item.value)
+            value, ok = QInputDialog.getDouble(
+                self, str(item), "Изменить число:", item.value
+            )
         elif item.valueType == VALUE_TYPES[BOOL]:
-            value, ok = QInputDialog.getItem(self, str(item),
-                                             'Изменить значение:',
-                                             ['false', 'true'],
-                                             int(item.value))
+            value, ok = QInputDialog.getItem(
+                self,
+                str(item),
+                "Изменить значение:",
+                ["false", "true"],
+                int(item.value),
+            )
             if ok and value:
-                value = value == 'true'
+                value = value == "true"
 
         if ok and value:
             part = self.treeWidget.topLevelItem(item.partIndex)
@@ -182,11 +203,10 @@ class Project(QWidget, Ui_Form):
             else:
                 current_el[item.path[-1]] = value
 
-            with open(item.file, 'w') as f:
+            with open(item.file, "w") as f:
                 json.dump(data, f, indent=2)
 
-            self.updateAspect(item.partIndex, item.aspectIndex, data,
-                              item.file)
+            self.updateAspect(item.partIndex, item.aspectIndex, data, item.file)
 
     def buildDict(self, root: QTreeWidgetItem):
         data = {}
@@ -199,8 +219,8 @@ class Project(QWidget, Ui_Form):
             try:
                 data[el.text(0)] = int(el.text(1))
             except ValueError:
-                if el.text(1) == 'true' or el.text(1) == 'false':
-                    data[el.text(0)] = el.text(1) == 'true'
+                if el.text(1) == "true" or el.text(1) == "false":
+                    data[el.text(0)] = el.text(1) == "true"
                 else:
                     data[el.text(0)] = el.text(1)
 
@@ -209,11 +229,12 @@ class Project(QWidget, Ui_Form):
     def setValueToField(self, el: JsonField) -> JsonField:
         if isinstance(el.value, bool):
             el.valueType = VALUE_TYPES[BOOL]
-            el.setText(1, 'true' if el.value else 'false')
+            el.setText(1, "true" if el.value else "false")
         elif isinstance(el.value, dict):
             el.valueType = VALUE_TYPES[DICT]
-            el = self.buildTree(el.value, el, el.file, el.path, el.partIndex,
-                                el.aspectIndex)
+            el = self.buildTree(
+                el.value, el, el.file, el.path, el.partIndex, el.aspectIndex
+            )
         elif isinstance(el.value, int):
             el.valueType = VALUE_TYPES[INT]
             el.setText(1, str(el.value))
@@ -235,15 +256,22 @@ class Project(QWidget, Ui_Form):
             el = self.setValueToField()
             root.addChild(el)
 
-    def buildTree(self, data: dict, root: QTreeWidgetItem, file: str,
-                  path: list[str], partIndex: int, aspectIndex: int):
+    def buildTree(
+        self,
+        data: dict,
+        root: QTreeWidgetItem,
+        file: str,
+        path: list[str],
+        partIndex: int,
+        aspectIndex: int,
+    ):
         for i in range(root.childCount()):
             root.removeChild(root.child(i))
 
         for key, value in data.items():
             el = self.setValueToField(
-                JsonField(root, file, [*path, key], value, partIndex,
-                          aspectIndex))
+                JsonField(root, file, [*path, key], value, partIndex, aspectIndex)
+            )
             root.addChild(el)
 
         return root
@@ -259,8 +287,7 @@ class Project(QWidget, Ui_Form):
         self.tableWidget.cellDoubleClicked.connect(self.editCell)
 
     def changeTable(self, i):
-        self.currentTable = self.tableChooser.itemText(
-            i).lower() if i != 0 else None
+        self.currentTable = self.tableChooser.itemText(i).lower() if i != 0 else None
         self.updateTable()
 
     def updateTable(self):
@@ -271,7 +298,7 @@ class Project(QWidget, Ui_Form):
         headers, data = self.db.get_info(self.currentTable)
         headers = list(map(str.capitalize, headers))
         try:
-            headers[headers.index('Id')] = 'ID'
+            headers[headers.index("Id")] = "ID"
         except ValueError:
             pass
 
@@ -289,41 +316,39 @@ class Project(QWidget, Ui_Form):
         if not isinstance(el, DBField) or col == 0:
             return
 
-        title = 'Настройка базы данных'
+        title = "Настройка базы данных"
 
         ok = False
         value = None
         if isinstance(el.value, bool):
-            value, ok = QInputDialog.getItem(self, title, 'Изменить значение:',
-                                             ['false', 'true'], int(el.value))
+            value, ok = QInputDialog.getItem(
+                self, title, "Изменить значение:", ["false", "true"], int(el.value)
+            )
             if ok and value:
-                value = value == 'true'
+                value = value == "true"
         elif isinstance(el.value, float):
-            value, ok = QInputDialog.getDouble(self, title, 'Изменить число:',
-                                               el.value)
+            value, ok = QInputDialog.getDouble(self, title, "Изменить число:", el.value)
         elif isinstance(el.value, int):
-            value, ok = QInputDialog.getInt(self, title, 'Изменить число:',
-                                            el.value)
+            value, ok = QInputDialog.getInt(self, title, "Изменить число:", el.value)
         elif isinstance(el.value, decimal.Decimal):
             value, ok = QInputDialog.getText(
                 self,
                 title,
                 "Изменить число (ВНИМАНИЕ! ВВОДИТЬ МОЖНО ТОЛЬКО ЧИСЛА!)",
-                text=str(el.value))
+                text=str(el.value),
+            )
             if ok and value:
                 try:
                     new_value = decimal.Decimal(value)
                 except decimal.InvalidOperation:
-                    QMessageBox.critical(self, "Ошибка ввода",
-                                         "Введено не число")
+                    QMessageBox.critical(self, "Ошибка ввода", "Введено не число")
                     value = None
                 else:
                     value = new_value
         elif isinstance(el.value, str):
-            value, ok = QInputDialog.getText(self,
-                                             title,
-                                             "Изменить текст:",
-                                             text=el.value)
+            value, ok = QInputDialog.getText(
+                self, title, "Изменить текст:", text=el.value
+            )
         elif isinstance(el.value, datetime.date):
             dialog = date_dialogs.DateDialog(self, title, el.value)
             ok = bool(dialog.exec())
@@ -338,18 +363,19 @@ class Project(QWidget, Ui_Form):
             value = dialog.dateTimeEdit.dateTime().toPyDateTime()
         elif isinstance(el.value, datetime.timedelta):
             dialog = date_dialogs.DateTimeDialog(
-                self, title,
+                self,
+                title,
                 datetime.datetime(2000, 1, 1) + el.value,
-                "Изменить промежуток (ВНИМАНИЕ! Минимальная дата - 01.01.2000, она будет вычтена при подсчете промежутка)"
+                "Изменить промежуток (ВНИМАНИЕ! Минимальная дата - 01.01.2000, она будет вычтена при подсчете промежутка)",
             )
             ok = bool(dialog.exec())
-            value = dialog.dateTimeEdit.dateTime().toPyDateTime(
-            ) - datetime.datetime(2000, 1, 1)
+            value = dialog.dateTimeEdit.dateTime().toPyDateTime() - datetime.datetime(
+                2000, 1, 1
+            )
         elif isinstance(el.value, uuid.UUID):
-            value, ok = QInputDialog.getText(self,
-                                             title,
-                                             "Изменить UUID:",
-                                             text=str(el.value))
+            value, ok = QInputDialog.getText(
+                self, title, "Изменить UUID:", text=str(el.value)
+            )
             if ok and value:
                 try:
                     value = uuid.UUID(value)
@@ -360,16 +386,17 @@ class Project(QWidget, Ui_Form):
             id = self.tableWidget.item(row, 0)
             col_name = self.tableWidget.horizontalHeaderItem(col)
             try:
-                self.db.update_data(self.currentTable, value, id.text(),
-                                    col_name.text().lower())
+                self.db.update_data(
+                    self.currentTable, value, id.text(), col_name.text().lower()
+                )
                 self.updateTable()
             except Error as e:
                 QMessageBox.critical(self, "Ошибка базы данных", str(e))
 
     def setupEnv(self):
-        filepath = os.path.join(self.dir, '.env')
+        filepath = os.path.join(self.dir, ".env")
         if not os.path.exists(filepath):
-            with open(filepath, 'w'):
+            with open(filepath, "w"):
                 pass
 
         self.envPath = filepath
@@ -382,13 +409,14 @@ class Project(QWidget, Ui_Form):
         for i, key in enumerate(keys):
             if defaults[key] is not None:
                 el = QTableWidgetItem(str(defaults[key]))
-                el.setFlags(Qt.ItemFlag.ItemIsEnabled
-                            | Qt.ItemFlag.ItemIsSelectable)
+                el.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
                 self.envTable.setItem(i, 1, el)
-            el = QTableWidgetItem(env[key] if key in env else '')
-            el.setFlags(Qt.ItemFlag.ItemIsEnabled
-                        | Qt.ItemFlag.ItemIsSelectable
-                        | Qt.ItemFlag.ItemIsEditable)
+            el = QTableWidgetItem(env[key] if key in env else "")
+            el.setFlags(
+                Qt.ItemFlag.ItemIsEnabled
+                | Qt.ItemFlag.ItemIsSelectable
+                | Qt.ItemFlag.ItemIsEditable
+            )
             self.envTable.setItem(i, 0, el)
 
         self.envTable.cellChanged.connect(self.changeEnv)
@@ -396,7 +424,7 @@ class Project(QWidget, Ui_Form):
     def changeEnv(self, row, col):
         data = self.envTable.item(row, col).text()
         key = self.envTable.verticalHeaderItem(row).text()
-        if data == '':
+        if data == "":
             unset_key(self.envPath, key)
         else:
             set_key(self.envPath, key, data)

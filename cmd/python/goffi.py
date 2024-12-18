@@ -1,14 +1,15 @@
 import ctypes
-import os
 import json
+import os
 import platform
+
 import inflect
 
 dll_path = "./easyserver"
-if platform.system() == 'Windows':
-    dll_path += '.dll'
+if platform.system() == "Windows":
+    dll_path += ".dll"
 else:
-    dll_path += '.so'
+    dll_path += ".so"
 
 
 class GoSideError(Exception):
@@ -16,16 +17,15 @@ class GoSideError(Exception):
 
 
 class GoString(ctypes.Structure):
-    _fields_ = [('p', ctypes.c_char_p), ('n', ctypes.c_longlong)]
+    _fields_ = [("p", ctypes.c_char_p), ("n", ctypes.c_longlong)]
 
 
 class GetConfiguration_return(ctypes.Structure):
-    _fields_ = [('r0', ctypes.c_char_p), ('r1', ctypes.c_bool)]
+    _fields_ = [("r0", ctypes.c_char_p), ("r1", ctypes.c_bool)]
 
 
 class List_return(ctypes.Structure):
-    _fields_ = [('r0', ctypes.c_size_t),
-                ('r1', ctypes.POINTER(ctypes.c_char_p))]
+    _fields_ = [("r0", ctypes.c_size_t), ("r1", ctypes.POINTER(ctypes.c_char_p))]
 
 
 def GetDefaultModuleConfiguration(module: str) -> tuple[bytes, bool]:
