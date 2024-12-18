@@ -24,16 +24,29 @@ type Router struct {
 }
 
 func (router *Router) sortedModulePaths() []string {
+	list := router.ModuleNames()
+	slices.SortFunc(list, func(a string, b string) int {
+		return len(strings.Split(strings.TrimPrefix(b, "/"), "/")) - len(strings.Split(strings.TrimPrefix(a, "/"), "/"))
+	})
+	return list
+}
+
+func (router *Router) ModuleNames() []string {
 	list := make([]string, len(router.Modules))
 	i := 0
 	for key := range router.Modules {
 		list[i] = key
 		i++
 	}
-	slices.SortFunc(list, func(a string, b string) int {
-		return len(strings.Split(strings.TrimPrefix(b, "/"), "/")) - len(strings.Split(strings.TrimPrefix(a, "/"), "/"))
-	})
 	return list
+}
+
+func (router *Router) ModelsList() []any {
+	var res []any
+	for _, module := range router.Modules {
+		res = append(res, module.Models...)
+	}
+	return res
 }
 
 func (router *Router) GetController(requestPath string) *Controller {

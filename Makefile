@@ -8,9 +8,9 @@
 PROGRAM_NAME=easyserver
 
 # Binary name
-BINARY = ./build/${PROGRAM_NAME}
+BINARY_CLI = ./build/${PROGRAM_NAME}
 ifeq ($(OS),Windows_NT)
-	BINARY := $(BINARY).exe
+	BINARY_CLI := $(BINARY).exe
 endif
 
 #  Module name
@@ -57,9 +57,13 @@ help: ## Show this help.
 #### DEPENDENCIES ####
 ######################
 
-deps: ## Download the dependencies.
+go-deps: ## Download the dependencies for Go.
 	go mod download
-.PHONY: deps
+.PHONY: go-deps
+
+py-deps: ## Download the dependencies for Python.
+	pip install -r requirements.txt
+.PHONY: py-deps
 
 externals: ## Install external dependencies
 	go install golang.org/x/exp/cmd/modgraphviz@latest
@@ -75,15 +79,26 @@ graph: deps ## Makes dependency graph
 ####### BUILD ########
 ######################
 
-build: $(BINARY) ## Build program
+build: $(BINARY_CLI) ## Build program
 .PHONY: build
 
+ffi_build:
+	go build -o ./build/easyserver.so -buildmode=c-shared ./ffi
+
 run: ## Run program without building
-	go run ${LDFLAGS} ./cmd
+	go run ${LDFLAGS} ./cmd/cli
 .PHONY: run
 
+python_run: ffi_build ## Run Python code
+	pyuic6 -o ./cmd/python/ui/ui.py ./cmd/python/ui/mainwindow.ui
+	pyuic6 -o ./cmd/python/ui/frame.py ./cmd/python/ui/project.ui
+	pyuic6 -o ./cmd/python/ui/input_date.py ./cmd/python/ui/date.ui
+	pyuic6 -o ./cmd/python/ui/input_time.py ./cmd/python/ui/time.ui
+	pyuic6 -o ./cmd/python/ui/input_datetime.py ./cmd/python/ui/datetime.ui
+	cd build; python3 ../cmd/python/gui.py
+
 build_race: ## Build program with race detector
-	go build -race ${LDFLAGS} -o $(BINARY) ./cmd
+	go build -race ${LDFLAGS} -o $(BINARY_CLI) ./cmd/cli
 .PHONY: build_race
 
 clean: ## Clean build output
@@ -100,11 +115,11 @@ dev: deps ## Start program in dev mode
 #### CODE QUALITY ####
 ######################
 
-lint: deps ## Lint the source files
+lint: go-deps ## Lint the source files
 	golangci-lint run --timeout 5m -E revive,gosec
 .PHONY: lint
 
-test: dep ## Run tests
+test: go-deps ## Run tests
 	go test -race -p 1 -timeout 300s -coverprofile=.test_coverage.txt ./... && \
     	go tool cover -func=.test_coverage.txt | tail -n1 | awk '{print "Total test coverage: " $$3}'
 	@rm .test_coverage.txt
@@ -113,8 +128,8 @@ test: dep ## Run tests
 ####### FILES ########
 ######################
 
-$(BINARY): FORCE
-	go build ${LDFLAGS} -o $0 ./cmd
+$(BINARY_CLI): FORCE
+	go build ${LDFLAGS} -o $0 ./cmd/cli
 	$(GOPATH)/bin/gosec
 
 go.mod: FORCE

@@ -1,0 +1,10 @@
+inflect==7.4.0
+more-itertools==10.5.0
+psycopg2==2.9.10
+PyQt6==6.7.1
+PyQt6-Qt6==6.7.3
+PyQt6_sip==13.8.0
+python-dotenv==1.0.1
+setuptools==75.5.0
+typeguard==4.4.1
+typing_extensions==4.12.2
