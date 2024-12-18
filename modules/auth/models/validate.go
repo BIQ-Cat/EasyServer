@@ -7,10 +7,11 @@ import (
 	"github.com/jinzhu/gorm"
 
 	// Internals
-	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
-	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
+
 	// Configuration
+	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 )
 
 func (a *Account) Validate() (msg map[string]interface{}, ok bool) {
@@ -51,7 +52,7 @@ func (a *Account) validateEmail() (map[string]interface{}, bool) {
 	}
 
 	temp := &Account{}
-	err := db.GetDB().Table("accounts").Where("email = ?", a.Email).First(temp).Error
+	err := router.DefaultRouter.DB().Table("accounts").Where("email = ?", a.Email).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return utils.Message(false, "Connection error. Please retry"), false
 	}
@@ -68,7 +69,7 @@ func (a *Account) validatePhoneNumber() (map[string]interface{}, bool) {
 	}
 
 	temp := &Account{}
-	err := db.GetDB().Table("accounts").Where("phone = ?", a.Phone).First(temp).Error
+	err := router.DefaultRouter.DB().Table("accounts").Where("phone = ?", a.Phone).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return utils.Message(false, "Connection error. Please retry"), false
 	}
@@ -91,7 +92,7 @@ func (a *Account) validateUsername() (map[string]interface{}, bool) {
 	}
 
 	temp := &Account{}
-	err := db.GetDB().Table("accounts").Where("username = ?", a.Username).First(temp).Error
+	err := router.DefaultRouter.DB().Table("accounts").Where("username = ?", a.Username).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return utils.Message(false, "Connection error. Please retry"), false
 	}

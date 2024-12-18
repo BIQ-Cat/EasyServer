@@ -9,10 +9,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	// Modules
+	"github.com/BIQ-Cat/easyserver"
+	"github.com/BIQ-Cat/easyserver/modules/auth/datakeys"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 
 	// Configuration
@@ -24,8 +26,12 @@ type UserKey struct{}
 
 func JWTAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		controller := routes.GetController(r.URL.Path)
-		if controller == nil || !controller.RequireAuth {
+		controller := router.DefaultRouter.GetController(r.URL.Path)
+		var ok bool
+		if controller != nil {
+			_, ok = controller.Data[datakeys.RequireAuth]
+		}
+		if !ok {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -86,6 +92,7 @@ func JWTAuthentication(next http.Handler) http.Handler {
 	})
 }
 
-func verificationRequired(tk models.Token, path string, c *routes.Controller) bool {
-	return !tk.Verified && (moduleconfig.Config.Verify.Require && path != "/auth/verify-send" && path != "/auth/verify-recieve" || c.RequireVerification)
+func verificationRequired(tk models.Token, path string, c *easyserver.Controller) bool {
+	_, ok := c.Data[datakeys.RequireVerification]
+	return !tk.Verified && (moduleconfig.Config.Verify.Require && path != "/auth/verify-send" && path != "/auth/verify-recieve" || ok)
 }
