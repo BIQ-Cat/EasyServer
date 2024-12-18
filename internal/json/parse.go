@@ -22,10 +22,10 @@ func ParseFiles() error {
 			return fmt.Errorf("error while reading file: %w", err)
 		}
 
-		res := reflect.ValueOf(*cfg)
+		res := reflect.ValueOf(*cfg).Interface()
 
 		err = json.Unmarshal(raw, &res)
-		*Configurations[i] = res.Interface().(basictypes.JSONConfig)
+		*Configurations[i] = res.(basictypes.JSONConfig)
 		if err != nil {
 			return err
 		}
