@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
+
+	basictypes "github.com/BIQ-Cat/easyserver/config/types"
 )
 
 func ParseFiles() error {
-	for _, cfg := range Configurations {
+	for key, cfg := range Configurations {
 		if !(*cfg).HasExternalFile() {
 			continue
 		}
@@ -19,7 +22,10 @@ func ParseFiles() error {
 			return fmt.Errorf("error while reading file: %w", err)
 		}
 
-		err = json.Unmarshal(raw, cfg)
+		res := reflect.ValueOf(*cfg).Interface()
+
+		err = json.Unmarshal(raw, &res)
+		*Configurations[key] = res.(basictypes.JSONConfig)
 		if err != nil {
 			return err
 		}
