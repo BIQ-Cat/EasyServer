@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	// Modules
+	"github.com/BIQ-Cat/easyserver"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/routes"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 )
 
@@ -52,9 +52,8 @@ func init() {
 		respond(w, r, resp)
 	}
 
-	Route["verify-recieve"] = routes.Controller{
-		Handler:     http.HandlerFunc(verifyOTP),
-		Methods:     []string{"GET"},
-		RequireAuth: false,
+	Route["verify-recieve"] = easyserver.Controller{
+		Handler: http.HandlerFunc(verifyOTP),
+		Methods: []string{"GET"},
 	}
 }

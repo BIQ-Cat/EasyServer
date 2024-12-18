@@ -1,8 +1,7 @@
 package controllers
 
 import (
-	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver"
 )
 
-var Route = make(routes.Route)
+var Route = make(easyserver.Route)
