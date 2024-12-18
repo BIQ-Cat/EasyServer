@@ -19,8 +19,8 @@ class Database:
 
     def update_data(self, table: str, value, id, col_name: str):
         with self.conn.cursor() as cur:
-            cur.execute(  # trunk-ignore(bandit)
-                f"UPDATE {table} SET {col_name} = % WHERE id = %s", (value, id)
+            cur.execute(
+                f"UPDATE {table} SET {col_name} = % WHERE id = %s", (value, id) # trunk-ignore(bandit)
             )
             self.conn.commit()
 
