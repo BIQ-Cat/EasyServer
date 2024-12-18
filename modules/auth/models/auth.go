@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 
 	// Configuration
@@ -30,7 +30,7 @@ func (a *Account) Create() (map[string]interface{}, error) {
 		}
 		a.Password = string(hashedPassword)
 	}
-	db.GetDB().Create(a)
+	router.DefaultRouter.DB().Create(a)
 
 	if a.ID <= 0 {
 		return utils.Message(false, "Failed to create account, connection error."), nil
@@ -67,7 +67,7 @@ func Login(login, password string) (map[string]interface{}, error) {
 		if field == "" {
 			continue
 		}
-		err = db.GetDB().Table("accounts").Where(field+" = ?", login).First(account).Error
+		err = router.DefaultRouter.DB().Table("accounts").Where(field+" = ?", login).First(account).Error
 
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {

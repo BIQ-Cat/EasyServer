@@ -7,14 +7,14 @@ import (
 
 	// Modules
 
+	"github.com/BIQ-Cat/easyserver"
 	moduleconfig "github.com/BIQ-Cat/easyserver/config/modules/auth"
 	"github.com/BIQ-Cat/easyserver/modules/auth/app"
 	"github.com/BIQ-Cat/easyserver/modules/auth/datakeys"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/db"
-	"github.com/BIQ-Cat/easyserver/internal/routes"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 	// Configuration
 )
@@ -24,7 +24,7 @@ func init() {
 		id := r.Context().Value(app.UserKey{}).(uint)
 		var acc models.Account
 
-		err := db.GetDB().Table("accounts").Where("id = ?", id).First(&acc).Error
+		err := router.DefaultRouter.DB().Table("accounts").Where("id = ?", id).First(&acc).Error
 		if err == gorm.ErrRecordNotFound {
 			panic(err) // must exist
 		} else if err != nil {
@@ -48,7 +48,7 @@ func init() {
 		utils.Respond(w, resp)
 	}
 
-	Route["forgot-password"] = routes.Controller{
+	Route["forgot-password"] = easyserver.Controller{
 		Handler: http.HandlerFunc(sendOTP),
 		Methods: []string{"GET"},
 		Data: map[string]any{

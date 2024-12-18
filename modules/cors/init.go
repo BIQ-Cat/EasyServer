@@ -1,13 +1,15 @@
 package cors
 
 import (
-	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/middlewares"
+	"github.com/BIQ-Cat/easyserver"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 
 	// Modules
 	"github.com/BIQ-Cat/easyserver/modules/cors/app"
 )
 
 func init() {
-	middlewares.Middlewares = append(middlewares.Middlewares, app.EnableCORS)
+	router.DefaultRouter.Modules["cors"] = easyserver.Module{
+		Middlewares: []easyserver.MiddlewareFunc{app.EnableCORS},
+	}
 }

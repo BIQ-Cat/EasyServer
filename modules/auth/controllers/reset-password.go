@@ -6,11 +6,10 @@ import (
 	"net/http"
 
 	// Modules
-
+	"github.com/BIQ-Cat/easyserver"
 	"github.com/BIQ-Cat/easyserver/modules/auth/models"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/routes"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 )
 
@@ -73,7 +72,7 @@ func init() {
 		utils.Respond(w, resp)
 	}
 
-	Route["reset-password"] = routes.Controller{
+	Route["reset-password"] = easyserver.Controller{
 		Handler: http.HandlerFunc(reset),
 		Methods: []string{http.MethodGet, http.MethodPatch},
 	}

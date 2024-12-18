@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 
 	// Internals
-	"github.com/BIQ-Cat/easyserver/internal/db"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 	"github.com/BIQ-Cat/easyserver/internal/utils"
 
 	// Configuration
@@ -95,7 +95,7 @@ func VerifyAccount(otp []byte) (map[string]interface{}, error) {
 
 	acc.Verified = true
 	acc.VerificationOTP = ""
-	err = db.GetDB().Save(acc).Error
+	err = router.DefaultRouter.DB().Save(acc).Error
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (a *Account) ChangePassword(password []byte) (map[string]interface{}, error
 	if !ok {
 		return msg, nil
 	}
-	err = db.GetDB().Save(a).Error
+	err = router.DefaultRouter.DB().Save(a).Error
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (a *Account) setOTP(isVerification bool) (string, map[string]interface{}, e
 		break
 	}
 
-	err := db.GetDB().Save(a).Error
+	err := router.DefaultRouter.DB().Save(a).Error
 	if err != nil {
 		return "", nil, err
 	}

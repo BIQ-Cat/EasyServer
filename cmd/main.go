@@ -6,11 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/BIQ-Cat/easyserver/internal/db"
 	"github.com/BIQ-Cat/easyserver/internal/json"
-	"github.com/BIQ-Cat/easyserver/internal/middlewares"
-	"github.com/BIQ-Cat/easyserver/internal/routes"
-	"github.com/gorilla/mux"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 
 	// Module imports
 	_ "github.com/BIQ-Cat/easyserver/config/modules"
@@ -23,7 +20,7 @@ import (
 func main() {
 	loadEnv()
 
-	err := db.Connect()
+	err := router.DefaultRouter.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,13 +30,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	root := mux.NewRouter()
-	root.Use(middlewares.Middlewares...)
-
-	routes.Setup(root)
-
 	srv := &http.Server{
-		Handler:      root,
+		Handler:      &router.DefaultRouter,
 		Addr:         fmt.Sprintf(":%d", config.EnvConfig.ServerPort),
 		WriteTimeout: 30 * time.Second,
 		ReadTimeout:  15 * time.Second,
