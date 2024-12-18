@@ -10,7 +10,7 @@ import (
 )
 
 func ParseFiles() error {
-	for i, cfg := range Configurations {
+	for key, cfg := range Configurations {
 		if !(*cfg).HasExternalFile() {
 			continue
 		}
@@ -25,7 +25,7 @@ func ParseFiles() error {
 		res := reflect.ValueOf(*cfg).Interface()
 
 		err = json.Unmarshal(raw, &res)
-		*Configurations[i] = res.(basictypes.JSONConfig)
+		*Configurations[key] = res.(basictypes.JSONConfig)
 		if err != nil {
 			return err
 		}

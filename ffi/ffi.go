@@ -9,22 +9,23 @@ import (
 
 	config "github.com/BIQ-Cat/easyserver/config/base"
 	"github.com/BIQ-Cat/easyserver/config/base/funcs"
-	"github.com/BIQ-Cat/easyserver/internal/addons"
-	"github.com/BIQ-Cat/easyserver/internal/db"
+	basictypes "github.com/BIQ-Cat/easyserver/config/types"
+	jsonConfig "github.com/BIQ-Cat/easyserver/internal/json"
+	"github.com/BIQ-Cat/easyserver/internal/router"
 
 	_ "github.com/BIQ-Cat/easyserver/config/modules"
 )
 
 //export GetDefaultModuleConfiguration
 func GetDefaultModuleConfiguration(moduleName string) (data *C.char, ok bool) {
-	var module *addons.Module
-	module, ok = addons.GetModule(moduleName)
-	if !ok || module.Configuration == nil {
+	var config *basictypes.JSONConfig
+	config, ok = jsonConfig.Configurations[moduleName]
+	if !ok || config == nil {
 		ok = false
 		return
 	}
 
-	res, err := json.MarshalIndent(module.Configuration, "", "  ")
+	res, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		ok = false
 	}
@@ -51,18 +52,19 @@ func GetEnvironmentConfiguration() (data *C.char, ok bool) {
 
 //export ListModels
 func ListModels() (C.size_t, **C.char) {
-	cArray := C.malloc(C.size_t(len(db.ModelsList)) * C.size_t(unsafe.Sizeof(uintptr(0))))
-	goSlice := unsafe.Slice((**C.char)(cArray), len(db.ModelsList))
-	for i, model := range db.ModelsList {
+	modelsList := router.DefaultRouter.ModelsList()
+	cArray := C.malloc(C.size_t(len(modelsList)) * C.size_t(unsafe.Sizeof(uintptr(0))))
+	goSlice := unsafe.Slice((**C.char)(cArray), len(modelsList))
+	for i, model := range modelsList {
 		goSlice[i] = C.CString(reflect.TypeOf(model).Name())
 	}
 
-	return (C.size_t)(len(db.ModelsList)), (**C.char)(cArray)
+	return (C.size_t)(len(modelsList)), (**C.char)(cArray)
 }
 
 //export ListModules
 func ListModules() (C.size_t, **C.char) {
-	moduleNames := addons.GetModuleNames()
+	moduleNames := router.DefaultRouter.ModuleNames()
 
 	cArray := C.malloc(C.size_t(len(moduleNames)) * C.size_t(unsafe.Sizeof(uintptr(0))))
 	goSlice := unsafe.Slice((**C.char)(cArray), len(moduleNames))
