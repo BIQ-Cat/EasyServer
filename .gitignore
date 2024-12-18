@@ -29,11 +29,3 @@ tmp/
 
 # Makefile builds
 build/
-
-# Python venv
-.venv/
-
-# Pycache
-__pycache__
-*.pyc
-

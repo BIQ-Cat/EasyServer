@@ -12,7 +12,7 @@ type Config struct {
 	OTPLength           int                    `json:"otpLength"`       // How long one-time password should be
 	Verify              VerificationConfig     `json:"verify"`          // Configure verification
 	RestorePassword     RestorePasswordConfig  `json:"restorePassword"` // Restore password configuration
-	OAuthConfigsEnabled map[string]OAuthConfig `json:"-"`               // All OAuth2 configurations enabled for the server. Here, the key should be a handler name passing in request.
+	OAuthConfigsEnabled map[string]OAuthConfig // All OAuth2 configurations enabled for the server. Here, the key should be a handler name passing in request.
 }
 
 func (c Config) GetJSONPath() string {

@@ -24,5 +24,5 @@ func init() {
 	}
 
 	var cfg basictypes.JSONConfig = moduleconfig.Config
-	json.Configurations["auth"] = &cfg
+	json.Configurations = append(json.Configurations, &cfg)
 }
