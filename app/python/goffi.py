@@ -3,8 +3,6 @@ import json
 import os
 import platform
 
-import inflect
-
 dll_path = "./easyserver"
 if platform.system() == "Windows":
     dll_path += ".dll"
@@ -25,7 +23,8 @@ class GetConfiguration_return(ctypes.Structure):
 
 
 class List_return(ctypes.Structure):
-    _fields_ = [("r0", ctypes.c_size_t), ("r1", ctypes.POINTER(ctypes.c_char_p))]
+    _fields_ = [("r0", ctypes.c_size_t),
+                ("r1", ctypes.POINTER(ctypes.c_char_p))]
 
 
 def GetDefaultModuleConfiguration(module: str) -> tuple[bytes, bool]:
@@ -50,12 +49,11 @@ def GetEnvironmentConfiguration() -> dict[str, int | float | str | None]:
 
 
 def ListModels() -> list[str]:
-    p = inflect.engine()
     lib = ctypes.cdll.LoadLibrary(os.path.abspath(dll_path))
     lib.ListModels.restype = List_return
 
     res = lib.ListModels()
-    return sorted(p.plural_noun(res.r1[i].decode()) for i in range(res.r0))
+    return sorted(res.r1[i].decode() + "s" for i in range(res.r0))
 
 
 def ListModules() -> list[str]:

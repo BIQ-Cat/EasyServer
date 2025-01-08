@@ -1,2 +1,2 @@
 #!/bin/bash
-go build -o ./easymaker ./app/build
+go build -o easymaker ./app/build
