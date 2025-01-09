@@ -19,4 +19,4 @@ jobs:
         go-version: '1.22'
 
     - name: Build project
-      run: go run app/build -no-color build
+      run: go run ./app/build -no-color build
