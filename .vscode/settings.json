@@ -1,4 +1,8 @@
 {
   "go.lintTool": "golangci-lint",
-  "go.lintFlags": ["--fast"]
+  "go.lintFlags": ["--fast"],
+  "files.associations": {
+    "iscript_test": "plaintext",
+    "iostream": "cpp"
+  }
 }
