@@ -5,6 +5,8 @@ import python_multipart
 import io
 import json
 
+import typing
+
 
 class URL:
 
@@ -57,3 +59,21 @@ class Response:
         self.status = status
         self.headers = []
         self.data = io.BytesIO()
+
+
+class Controller:
+
+    def __init__(self,
+                 handler: typing.Callable[[Request], Response],
+                 methods: typing.Optional[list[str]] = None,
+                 headers: typing.Optional[dict[str, str]] = None,
+                 schemas: typing.Optional[list[str]] = None,
+                 data: typing.Optional[dict[str, typing.Any]] = None):
+        self.handler = handler
+        self.methods = methods
+        self.headers = headers
+        self.schemas = schemas
+        self.data = data
+
+    def __call__(self, req: Request):
+        return self.handler(req)
