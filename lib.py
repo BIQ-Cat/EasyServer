@@ -23,7 +23,7 @@ class Request:
 
     def __init__(self, method: str, url: URL, protocol: str,
                  headers: dict[str, bytes], body: bytes,
-                 context: dict[str, str], cookies: dict[str, tuple[str, int]]):
+                 context: dict[str, bytes], cookies: dict[str, tuple[str, int]]):
         self.method = method
         self.url = url
         self.protocol = protocol
@@ -40,13 +40,14 @@ class Request:
         files = {}  # type: dict[bytes, multipart.multipart.File]
 
         def on_field(field: multipart.multipart.Field):
-            fields[field.field_name] = field
+            
+            fields[typing.cast(bytes, field.field_name)] = field
 
         def on_file(file: multipart.multipart.File):
-            files[file.field_name] = file
+            files[typing.cast(bytes, file.field_name)] = file
 
         python_multipart.parse_form(self.headers, io.BytesIO(self.raw_body),
-                                    on_field, on_file)
+                                    on_field, on_file)  # type: ignore
         return (fields, files)
 
     def parse_body_json(self):
@@ -55,19 +56,24 @@ class Request:
 
 class Response:
 
-    def __init__(self, status: int):
+    def __init__(self, status = 200):
         self.status = status
-        self.headers = []
+        self.headers = {}  # type: dict[str, bytes]
         self.data = io.BytesIO()
+    
+    def recieve(self):
+        return self.data.read()
 
+type Handler = typing.Callable[[Request], Response]
+type MiddlewareFunc = typing.Callable[[Handler], Handler]
 
 class Controller:
 
     def __init__(self,
-                 handler: typing.Callable[[Request], Response],
-                 methods: typing.Optional[list[str]] = None,
-                 headers: typing.Optional[dict[str, str]] = None,
-                 schemas: typing.Optional[list[str]] = None,
+                 handler: Handler,
+                 methods: typing.Optional[list[bytes]] = None,
+                 headers: typing.Optional[dict[str, bytes]] = None,
+                 schemas: typing.Optional[list[bytes]] = None,
                  data: typing.Optional[dict[str, typing.Any]] = None):
         self.handler = handler
         self.methods = methods
@@ -77,3 +83,10 @@ class Controller:
 
     def __call__(self, req: Request):
         return self.handler(req)
+
+
+class Module:
+    def __init__(self, route: dict[str, Controller], middlewares: list[MiddlewareFunc] = [], is_explict = True):
+        self.route = route
+        self.middlewares = middlewares
+        self.is_expict = is_explict
