@@ -86,16 +86,16 @@ ffi_build:
 	go build -o ./build/easyserver.so -buildmode=c-shared ./ffi
 
 run: ## Run program without building
-	go run ${LDFLAGS} ./cmd/cli
+	go run ${LDFLAGS} ./app/cli
 .PHONY: run
 
 python_run: ffi_build ## Run Python code
-	pyuic6 -o ./cmd/python/ui/ui.py ./cmd/python/ui/mainwindow.ui
-	pyuic6 -o ./cmd/python/ui/frame.py ./cmd/python/ui/project.ui
-	pyuic6 -o ./cmd/python/ui/input_date.py ./cmd/python/ui/date.ui
-	pyuic6 -o ./cmd/python/ui/input_time.py ./cmd/python/ui/time.ui
-	pyuic6 -o ./cmd/python/ui/input_datetime.py ./cmd/python/ui/datetime.ui
-	cd build; python3 ../cmd/python/gui.py
+	pyuic6 -o ./app/python/ui/ui.py ./app/python/ui/mainwindow.ui
+	pyuic6 -o ./app/python/ui/frame.py ./app/python/ui/project.ui
+	pyuic6 -o ./app/python/ui/input_date.py ./app/python/ui/date.ui
+	pyuic6 -o ./app/python/ui/input_time.py ./app/python/ui/time.ui
+	pyuic6 -o ./app/python/ui/input_datetime.py ./app/python/ui/datetime.ui
+	cd build; python3 ../app/python/gui.py
 
 build_race: ## Build program with race detector
 	go build -race ${LDFLAGS} -o $(BINARY_CLI) ./cmd/cli
@@ -129,7 +129,7 @@ test: go-deps ## Run tests
 ######################
 
 $(BINARY_CLI): FORCE
-	go build ${LDFLAGS} -o $0 ./cmd/cli
+	go build ${LDFLAGS} -o $0 ./app/cli
 	$(GOPATH)/bin/gosec
 
 go.mod: FORCE
