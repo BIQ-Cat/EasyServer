@@ -59,10 +59,7 @@ class Response:
     def __init__(self, status = 200):
         self.status = status
         self.headers = {}  # type: dict[str, bytes]
-        self.data = io.BytesIO()
-    
-    def recieve(self):
-        return self.data.read()
+        self.data = b""
 
 type Handler = typing.Callable[[Request], Response]
 type MiddlewareFunc = typing.Callable[[Handler], Handler]

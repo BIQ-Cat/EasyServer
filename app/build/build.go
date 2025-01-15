@@ -21,7 +21,7 @@ var buildFlagSet = flag.NewFlagSet("build", flag.ExitOnError)
 var buildCurrentTarget = buildFlagSet.String("target", "all", "Target to build. Use special target 'help' to get information about availibe targets.")
 var buildOutput = buildFlagSet.String("out", "./build", "Build destination")
 
-func runBuild() {
+func runBuild() int {
 	header := color.New(color.Bold)
 	header.Println("Build")
 	if *buildCurrentTarget == "help" {
@@ -29,19 +29,21 @@ func runBuild() {
 		for name, target := range buildTargets {
 			fmt.Fprintf(color.Output, "  %s %s\n", header.Sprint(name+":"), color.New(color.Italic).Add(color.FgBlue).Sprint(target.description))
 		}
-		return
+		return 0
 	}
 	for name, target := range buildTargets {
 		if *buildCurrentTarget == name {
 			if target.command() {
 				color.New(color.FgHiGreen).Add(color.Bold).Println("Success!")
+				return 0
 			} else {
 				color.New(color.FgHiRed).Add(color.Bold).Println("Failure!")
+				return 1
 			}
-			return
 		}
 	}
 	color.New(color.FgHiRed).Add(color.Bold).Fprintln(color.Error, "Undefined target")
+	return -1
 }
 
 func buildGo(dst, src string, windowsExt, unixExt string, buildmode string, stdout, stderr io.Writer) (ok bool) {

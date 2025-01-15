@@ -1,4 +1,4 @@
-package python
+package {{.}}
 
 import (
 	"path/filepath"
@@ -11,17 +11,17 @@ func init() {
 	api.StartPython()
 	defer api.EndPython()
 
-	path, err := filepath.Abs(filepath.Join(".", "modules", "python"))
+	path, err := filepath.Abs(filepath.Join(".", "modules", "{{.}}"))
 	if err != nil {
 		panic(err)
 	}
 
 	api.PythonImportLib()
 
-	module, ok := api.CreateModule(path, "python")
+	module, ok := api.CreateModule(path, "{{.}}")
 	if !ok {
 		panic("bad Python")
 	}
 
-	router.DefaultRouter.Modules["python"] = module
+	router.DefaultRouter.Modules["{{.}}"] = module
 }
