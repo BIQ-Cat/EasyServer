@@ -36,11 +36,12 @@ func main() {
 	for name, cmd := range commands {
 		if args[0] == name {
 			cmd.flagSet.Parse(args[1:])
-			cmd.run()
-			return
+			exitCode := cmd.run()
+			os.Exit(exitCode)
 		}
 	}
 
 	fmt.Fprintln(os.Stderr, "Command \""+args[0]+"\" not found")
 	flag.Usage()
+	os.Exit(-1)
 }

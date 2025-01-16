@@ -1,0 +1,15 @@
+package {{.}}
+
+import (
+	"github.com/BIQ-Cat/easyserver"
+	"github.com/BIQ-Cat/easyserver/internal/router"
+)
+
+func init() {
+	router.DefaultRouter.Modules["{{.}}"] = easyserver.Module{
+
+	}
+
+	// var cfg basictypes.JSONConfig = moduleconfig.Config
+	// json.Configurations["{{.}}"] = &cfg
+}

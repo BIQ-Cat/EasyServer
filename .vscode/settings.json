@@ -4,5 +4,7 @@
   "files.associations": {
     "iscript_test": "plaintext",
     "iostream": "cpp"
-  }
+  },
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "standard"
 }
