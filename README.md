@@ -20,3 +20,10 @@ for building all parts of EasyServer. Use _help_ target to see other options.
 To build sources without installation, you can use `build` command with the same targets.
 
 In the `build` folder, you can see your compiled EasyServer and (or) libraries.
+
+## Documentation
+Visit [pkg.go.dev](https://pkg.go.dev/github.com/BIQ-Cat/easyserver)
+
+
+
+
