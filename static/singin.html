@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sing in</title>
+  </head>
+  <body>
+    <form action="/auth/login" method="post">
+      <input type="text" id="email" placeholder="Email" />
+      <br />
+      <input type="password" id="password" />
+      <label for="password">Password</label>
+      <input type="submit" value="Log in" />
+    </form>
+    <p id="status"></p>
+    <script type="text/javascript">
+      document.forms[0].addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        let a = new Object();
+        a.username = document.getElementById("email").value;
+        a.password = document.getElementById("password").value;
+        fetch("/auth/login", {
+          method: "POST",
+          body: JSON.stringify(a),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((result) => {
+            if (!result.ok) {
+              alert("BAD STATUS: " + result.status);
+            }
+            return result.json();
+          })
+          .then((value) => {
+            let status = document.getElementById("status");
+            status.innerHTML = value.message + "<br>";
+            if (value.status) {
+              status.innerHTML +=
+                "Username: " + value.account.username + "<br>";
+              status.innerHTML += "Token: " + value.account.token + "<br>";
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

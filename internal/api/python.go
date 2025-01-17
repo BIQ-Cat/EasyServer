@@ -221,11 +221,12 @@ func handlePython(moduleName string, modulePath string, controllerName string) h
 			return
 		}
 
-		w.WriteHeader(status)
-
 		for key, header := range headers {
 			w.Header().Set(key, header)
 		}
+
+		w.WriteHeader(status)
+
 		io.WriteString(w, data)
 	})
 }
