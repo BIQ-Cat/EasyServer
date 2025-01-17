@@ -30,9 +30,6 @@ var Config = types.Config{
 		TokenLifetime: 2 * time.Hour,
 	},
 
-	// OAuthConfigsEnabled: map[string]types.OAuthConfig{
-	// 	"google": funcs.OAuthGoogleConfig(),
-	// },
 	OTPLength: 6,
 
 	BasicConfig: basictypes.BasicConfig{

@@ -3,7 +3,9 @@
   "go.lintFlags": ["--fast"],
   "files.associations": {
     "iscript_test": "plaintext",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "cxx.h": "c",
+    "stddef.h": "c"
   },
   "python.analysis.autoImportCompletions": true,
   "python.analysis.typeCheckingMode": "standard"
